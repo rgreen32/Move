@@ -1,9 +1,9 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
-
+let entrypoint = JSON.parse(process.env.npm_config_argv)["cooked"].pop()
 module.exports = {
   devtool: "eval-source-map",
-  entry: "./src/index.ts",
+  entry: [`./${entrypoint}/index.ts`],
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "index.bundle.js",
@@ -13,7 +13,12 @@ module.exports = {
     rules: [
       {
         test: /\.ts?$/,
-        use: ["ts-loader"],
+        use: [{
+          loader: 'awesome-typescript-loader',
+          options: {
+              configFileName: `./${entrypoint}/tsconfig.json`
+          },
+      }],
         exclude: /node_modules/
       },
       {
@@ -31,25 +36,10 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".html", ".jpg"],
   },
-  plugins: [new HtmlWebpackPlugin({ template: "./src/index.html" })],
+  plugins: [new HtmlWebpackPlugin({ template: "./index.html" })],
   devServer: {
     contentBase: [
-        path.resolve(__dirname, './fall'),
-        path.resolve(__dirname, './collision')
-    ],
-    open: true,
-    openPage: '',
-    compress: true,
-    port: 8000,
-    proxy: {
-        '/fall': {
-            target: 'http://localhost:8000/',
-            pathRewrite: { '^/fall' : '/' }
-        },
-        '/examples': {
-            target: 'http://localhost:8000/',
-            pathRewrite: { '^/collision' : '/' }
-        }
-    }
+        path.resolve(__dirname, `./${entrypoint}`)
+    ]
 }
 };
