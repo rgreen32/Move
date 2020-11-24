@@ -1,3 +1,5 @@
+import {evaluate} from 'mathjs'
+
 interface BoundValue{
     min: number
     max: number
@@ -6,6 +8,36 @@ interface BoundValue{
 interface Bounds{
     x: BoundValue
     y: BoundValue
+}
+
+class Vector{
+    length: number
+    angle: number
+    constructor(length: number, angle: number){
+        this.length = length
+        this.angle = angle
+    }
+}
+
+
+class Point{
+    x: number
+    y: number
+    constructor(x: number, y: number){
+        this.x = x
+        this.y = y
+    }
+}
+
+class Edge{
+    a: Point
+    b: Point
+    angle: number
+    constructor(a: Point, b: Point, angle: number){
+        this.a = a
+        this.b = b
+        this.angle = angle
+    }
 }
 
 export class Body{
@@ -17,6 +49,7 @@ export class Body{
     initialVelocity: number
     isStatic: boolean
     bounds: Bounds
+    edges: Array<Edge>
     constructor(distanceX: number, distanceY: number, 
         mass: number, height: number, width: number, initialVelocity: number, isStatic: boolean){
         this.distanceX = distanceX
@@ -26,8 +59,13 @@ export class Body{
         this.width = width
         this.initialVelocity = initialVelocity
         this.isStatic = isStatic
-
         this.calculateBounds()
+        let topRightCorner = new Point(this.bounds.x.max, this.bounds.y.max) 
+        let bottomRightCorner = new Point(this.bounds.x.max, this.bounds.y.min)
+        let topLeftCorner = new Point(this.bounds.x.min, this.bounds.y.max)
+        let bottomLeftCorner = new Point(this.bounds.x.min, this.bounds.y.min)
+        this.edges = [new Edge(topRightCorner, bottomRightCorner, 90), new Edge(bottomRightCorner, bottomLeftCorner, 0),
+             new Edge(bottomLeftCorner, topLeftCorner, 0), new Edge(topLeftCorner, topRightCorner, 90)]
     }
 
     calculateBounds = () =>{
@@ -40,26 +78,27 @@ export class Body{
 }
 
 export class CollisionDetector{
-    run = (bodies: Array<Body>) =>{
-        for(let i = 0; i < bodies.length; i++){
-            let body = bodies[i]
-            for(let x = 0; x < bodies.length; x++){
-                if(i == x){
-                    continue
-                }
-                let body2 = bodies[x]
-                if(body.bounds.x.min > body2.bounds.x.min && body.bounds.x.min < body2.bounds.x.max){
-                    
-                    if(body.bounds.y.min > body2.bounds.y.min && body.bounds.y.min < body2.bounds.y.max){
-                        console.log("X Overlap")
-                        console.log("Y Overlap")
-                        prompt("collsion")
-                    }
-                }
 
+    createAxisFromEdge = (edge: Edge) => {
+        let edgeLength = Math.sqrt((Math.pow((edge.a.x - edge.b.x), 2) + Math.pow((edge.a.y - edge.b.y), 2)))
+        let axis = new Vector(edgeLength, edge.angle - 90)
+        let projectedlength = edgeLength*Math.floor(evaluate(`cos(${axis.angle} deg)`))
+        return projectedlength
+
+    }
+
+    run = (bodies: Array<Body>) =>{
+
+        // for(let i = 0; i < bodies.length; i++){
+        //     let body = bodies[i]
+        //     this.createAxisFromEdge(body.edges[0])
+        //     }
+        let body = bodies[0]
+        for(let i = 0; i < body.edges.length; i++){
+            this.createAxisFromEdge(body.edges[i])
             }
 
-        }
+        
     }
 }
 
@@ -71,6 +110,7 @@ export class Engine{
         this.bodies = bodies
         this.start = Date.now()
         this.collisionDetector = new CollisionDetector()
+        this.collisionDetector.run(this.bodies)
 
     }
 
@@ -81,7 +121,7 @@ export class Engine{
     }
 
     run = () => {
-        this.collisionDetector.run(this.bodies)
+
         for (let i=0; i < this.bodies.length; i++){
             let body = this.bodies[i]
             if(body.isStatic == true){
@@ -243,3 +283,12 @@ function fillrectTranslator(x: number, y: number, w: number, h: number){
     let Y = y - (h/2)
     return {x: X, y: Y, w: w, h: h}
 }
+
+// function cosine (angle) {
+//     console.log("angle", angle)
+//     console.log("evaluate", evaluate(`sin(${angle} deg)`))
+//     console.log("val pre conversion",  Math.cos(angle))
+//     let val = angle * (Math.PI / 180);
+//     console.log("val", Math.cos(val) )
+//     return Math.cos(val) 
+//   }
