@@ -81,14 +81,6 @@ export class Body{
         for(let i = 0; i < sides; i++){
             let resultx = r * Math.round(evaluate(`cos(${theta*i} deg)`))
             let resulty = r * Math.round(evaluate(`sin(${theta*i} deg)`))
-            console.log("i", i)
-            console.log("theta", `cos(${theta*i} deg)`)
-            console.log("cosine", evaluate(`cos(${theta*i} deg)`))
-            console.log("x", resultx)
-            if (i == 3){
-                console.log((resultx *3) == -0)
-            }
-
             points.push(new Point(resultx, resulty))
         }
         // console.log(points)
@@ -131,7 +123,7 @@ export class CollisionDetector{
             let edge = {x:(point2.x - point1.x), y:(point2.y, point1.y)}
             edges.push(edge)
         }
-        // console.log(edges)
+        console.log(edges)
 
         
     }
@@ -189,8 +181,6 @@ export class Renderer{
         this.X_AxisDistance = 100 * this.windowRatio
         this.heightRatio = canvas.height/this.Y_AxisDistance
         this.widthRatio = canvas.width/2/this.X_AxisDistance
-        this.drawShape(engine.bodies[0])
-
     }
     
     metersToPixelsDistanceY = (height: number) => {
@@ -218,20 +208,8 @@ export class Renderer{
         
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.ctx.moveTo(this.metersToPixelsDistanceX(14), this.metersToPixelsDistanceY(90))
-        this.ctx.lineTo(this.metersToPixelsDistanceX(10), this.metersToPixelsDistanceY(94))
-        this.ctx.stroke()
-        this.ctx.moveTo(this.metersToPixelsDistanceX(10), this.metersToPixelsDistanceY(94))
-        this.ctx.lineTo(this.metersToPixelsDistanceX(6), this.metersToPixelsDistanceY(90))
-        this.ctx.stroke()
-        this.ctx.moveTo(this.metersToPixelsDistanceX(6), this.metersToPixelsDistanceY(90))
-        this.ctx.lineTo(this.metersToPixelsDistanceX(10), this.metersToPixelsDistanceY(86)) // x would be 6
-        this.ctx.stroke()
-        this.ctx.moveTo(this.metersToPixelsDistanceX(10), this.metersToPixelsDistanceY(86)) // x would be 6
-        this.ctx.lineTo(this.metersToPixelsDistanceX(14), this.metersToPixelsDistanceY(90))
-        this.ctx.stroke()
-        
         this.drawAxis()
+        this.drawShape(this.engine.bodies[0])
         for (let i=0; i < bodies.length; i++){
             let body = bodies[i]
             let positionX = this.metersToPixelsDistanceX(body.distanceX)
@@ -241,11 +219,6 @@ export class Renderer{
 
 
             let params = fillrectTranslator(positionX, positionY, widthPixels, heightPixels)
-        
-
-            // this.ctx.fillRect(params.x ,params.y, params.w, params.h)
-            // body.calculateBounds()
-            // this.highlightBounds(body)
             
             this.ctx.fillStyle = "#000000";
         }
@@ -256,23 +229,15 @@ export class Renderer{
     drawShape = (body: Body) => {
         let points = body.points
         let origin = new Point(body.distanceX, body.distanceY)
-        console.log("Origin", origin)
         for(let i = 0; i < points.length; i++){
             let pointA = points[i]
             let pointB = points[(i + 1) % points.length]
-            // console.log("origin x", origin.x)
-            // console.log("pointA x", pointA.x)
-            // console.log("pointB x", pointB.x)
-            // let pointA2 = new Point(origin.x + pointA.x, origin.y + pointA.y)
-            // let pointB2 = new Point(origin.x + pointB.x, origin.y + pointB.y)
-            // this.ctx.beginPath();
-            // console.log("PointA2 X", pointA2.x)
-            // // console.log("PointA2 Y", pointA2.y)
-            // console.log("PointB2 X", pointB2.x)
-            // // console.log("PointB2 Y", pointB2.y)
-            // console.log("=========")
-            // // this.ctx.stroke()
-
+            let pointA2 = new Point(origin.x + pointA.x, origin.y + pointA.y)
+            let pointB2 = new Point(origin.x + pointB.x, origin.y + pointB.y)
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.metersToPixelsDistanceX(pointA2.x), this.metersToPixelsDistanceY(pointA2.y))
+            this.ctx.lineTo(this.metersToPixelsDistanceX(pointB2.x), this.metersToPixelsDistanceY(pointB2.y))
+            this.ctx.stroke()
         }
     }
 
