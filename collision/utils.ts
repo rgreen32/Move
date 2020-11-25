@@ -1,4 +1,4 @@
-import {evaluate} from 'mathjs'
+import {evaluate, or} from 'mathjs'
 
 interface BoundValue{
     min: number
@@ -41,6 +41,7 @@ class Edge{
 }
 
 export class Body{
+    angle: number = 90
     distanceX: number 
     distanceY: number
     mass: number
@@ -50,6 +51,8 @@ export class Body{
     isStatic: boolean
     bounds: Bounds
     edges: Array<Edge>
+    points: Array<Point>
+    edgePoints: Array<Point>
     constructor(distanceX: number, distanceY: number, 
         mass: number, height: number, width: number, initialVelocity: number, isStatic: boolean){
         this.distanceX = distanceX
@@ -60,12 +63,37 @@ export class Body{
         this.initialVelocity = initialVelocity
         this.isStatic = isStatic
         this.calculateBounds()
+        this.points = this.calculateShapeVectors(4)
+        
         let topRightCorner = new Point(this.bounds.x.max, this.bounds.y.max) 
         let bottomRightCorner = new Point(this.bounds.x.max, this.bounds.y.min)
         let topLeftCorner = new Point(this.bounds.x.min, this.bounds.y.max)
         let bottomLeftCorner = new Point(this.bounds.x.min, this.bounds.y.min)
+        this.edgePoints = [topRightCorner, bottomRightCorner, topLeftCorner, bottomLeftCorner]
         this.edges = [new Edge(topRightCorner, bottomRightCorner, 90), new Edge(bottomRightCorner, bottomLeftCorner, 0),
              new Edge(bottomLeftCorner, topLeftCorner, 0), new Edge(topLeftCorner, topRightCorner, 90)]
+    }
+
+    calculateShapeVectors = (sides: number) => {
+        let theta = 360/sides
+        let r = this.width/2
+        let points = []
+        for(let i = 0; i < sides; i++){
+            let resultx = r * Math.round(evaluate(`cos(${theta*i} deg)`))
+            let resulty = r * Math.round(evaluate(`sin(${theta*i} deg)`))
+            console.log("i", i)
+            console.log("theta", `cos(${theta*i} deg)`)
+            console.log("cosine", evaluate(`cos(${theta*i} deg)`))
+            console.log("x", resultx)
+            if (i == 3){
+                console.log((resultx *3) == -0)
+            }
+
+            points.push(new Point(resultx, resulty))
+        }
+        // console.log(points)
+        return points
+
     }
 
     calculateBounds = () =>{
@@ -80,10 +108,12 @@ export class Body{
 export class CollisionDetector{
 
     createAxisFromEdge = (edge: Edge) => {
-        let edgeLength = Math.sqrt((Math.pow((edge.a.x - edge.b.x), 2) + Math.pow((edge.a.y - edge.b.y), 2)))
-        let axis = new Vector(edgeLength, edge.angle - 90)
-        let projectedlength = edgeLength*Math.floor(evaluate(`cos(${axis.angle} deg)`))
-        return projectedlength
+        // console.log("edge", edge)
+        let axisProj = new Point(-(edge.a.y - edge.b.y), (edge.a.x - edge.b.x))
+        // console.log("projection", axisProj)
+        let axis = new Vector(10, edge.angle - 90)
+        // let projectedlength = edgeLength*Math.floor(evaluate(`cos(${axis.angle} deg)`))
+        return axis
 
     }
 
@@ -93,10 +123,15 @@ export class CollisionDetector{
         //     let body = bodies[i]
         //     this.createAxisFromEdge(body.edges[0])
         //     }
+        let edges = []
         let body = bodies[0]
-        for(let i = 0; i < body.edges.length; i++){
-            this.createAxisFromEdge(body.edges[i])
-            }
+        for(let a = 0; a < body.points.length; a++){
+            let point1 = body.points[a]
+            let point2 = body.points[(a+1) % body.points.length]
+            let edge = {x:(point2.x - point1.x), y:(point2.y, point1.y)}
+            edges.push(edge)
+        }
+        // console.log(edges)
 
         
     }
@@ -154,6 +189,8 @@ export class Renderer{
         this.X_AxisDistance = 100 * this.windowRatio
         this.heightRatio = canvas.height/this.Y_AxisDistance
         this.widthRatio = canvas.width/2/this.X_AxisDistance
+        this.drawShape(engine.bodies[0])
+
     }
     
     metersToPixelsDistanceY = (height: number) => {
@@ -180,6 +217,20 @@ export class Renderer{
         let bodies = this.engine.bodies
         
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        this.ctx.moveTo(this.metersToPixelsDistanceX(14), this.metersToPixelsDistanceY(90))
+        this.ctx.lineTo(this.metersToPixelsDistanceX(10), this.metersToPixelsDistanceY(94))
+        this.ctx.stroke()
+        this.ctx.moveTo(this.metersToPixelsDistanceX(10), this.metersToPixelsDistanceY(94))
+        this.ctx.lineTo(this.metersToPixelsDistanceX(6), this.metersToPixelsDistanceY(90))
+        this.ctx.stroke()
+        this.ctx.moveTo(this.metersToPixelsDistanceX(6), this.metersToPixelsDistanceY(90))
+        this.ctx.lineTo(this.metersToPixelsDistanceX(10), this.metersToPixelsDistanceY(86)) // x would be 6
+        this.ctx.stroke()
+        this.ctx.moveTo(this.metersToPixelsDistanceX(10), this.metersToPixelsDistanceY(86)) // x would be 6
+        this.ctx.lineTo(this.metersToPixelsDistanceX(14), this.metersToPixelsDistanceY(90))
+        this.ctx.stroke()
+        
         this.drawAxis()
         for (let i=0; i < bodies.length; i++){
             let body = bodies[i]
@@ -192,14 +243,37 @@ export class Renderer{
             let params = fillrectTranslator(positionX, positionY, widthPixels, heightPixels)
         
 
-            this.ctx.fillRect(params.x ,params.y, params.w, params.h)
+            // this.ctx.fillRect(params.x ,params.y, params.w, params.h)
             // body.calculateBounds()
-            this.highlightBounds(body)
+            // this.highlightBounds(body)
             
             this.ctx.fillStyle = "#000000";
         }
     
         window.requestAnimationFrame(this.run)
+    }
+
+    drawShape = (body: Body) => {
+        let points = body.points
+        let origin = new Point(body.distanceX, body.distanceY)
+        console.log("Origin", origin)
+        for(let i = 0; i < points.length; i++){
+            let pointA = points[i]
+            let pointB = points[(i + 1) % points.length]
+            // console.log("origin x", origin.x)
+            // console.log("pointA x", pointA.x)
+            // console.log("pointB x", pointB.x)
+            // let pointA2 = new Point(origin.x + pointA.x, origin.y + pointA.y)
+            // let pointB2 = new Point(origin.x + pointB.x, origin.y + pointB.y)
+            // this.ctx.beginPath();
+            // console.log("PointA2 X", pointA2.x)
+            // // console.log("PointA2 Y", pointA2.y)
+            // console.log("PointB2 X", pointB2.x)
+            // // console.log("PointB2 Y", pointB2.y)
+            // console.log("=========")
+            // // this.ctx.stroke()
+
+        }
     }
 
     drawAxis = () =>{
@@ -283,12 +357,3 @@ function fillrectTranslator(x: number, y: number, w: number, h: number){
     let Y = y - (h/2)
     return {x: X, y: Y, w: w, h: h}
 }
-
-// function cosine (angle) {
-//     console.log("angle", angle)
-//     console.log("evaluate", evaluate(`sin(${angle} deg)`))
-//     console.log("val pre conversion",  Math.cos(angle))
-//     let val = angle * (Math.PI / 180);
-//     console.log("val", Math.cos(val) )
-//     return Math.cos(val) 
-//   }
