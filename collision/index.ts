@@ -5,9 +5,10 @@ canvas.height = window.innerHeight
 canvas.width = window.innerWidth
 
 var block = new Body(10, 90, 10, 8, 8, 0, true)
+var block2 = new Body(5, 30, 10, 8, 8, 0, true)
 // var floor = new Body(0, 30, 1000, 2, 30,0, true)
 
-var bodies = [block]
+var bodies = [block, block2]
 
 
 var engine = new Engine(bodies)

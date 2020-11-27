@@ -1,24 +1,4 @@
-import {evaluate, or} from 'mathjs'
-
-interface BoundValue{
-    min: number
-    max: number
-}
-
-interface Bounds{
-    x: BoundValue
-    y: BoundValue
-}
-
-class Vector{
-    length: number
-    angle: number
-    constructor(length: number, angle: number){
-        this.length = length
-        this.angle = angle
-    }
-}
-
+import {evaluate} from 'mathjs'
 
 class Point{
     x: number
@@ -32,16 +12,13 @@ class Point{
 class Edge{
     a: Point
     b: Point
-    angle: number
-    constructor(a: Point, b: Point, angle: number){
+    constructor(a: Point, b: Point){
         this.a = a
         this.b = b
-        this.angle = angle
     }
 }
 
 export class Body{
-    angle: number = 90
     distanceX: number 
     distanceY: number
     mass: number
@@ -49,10 +26,8 @@ export class Body{
     width: number
     initialVelocity: number
     isStatic: boolean
-    bounds: Bounds
-    edges: Array<Edge>
     points: Array<Point>
-    edgePoints: Array<Point>
+    transformedPoints: Array<Point>
     constructor(distanceX: number, distanceY: number, 
         mass: number, height: number, width: number, initialVelocity: number, isStatic: boolean){
         this.distanceX = distanceX
@@ -62,16 +37,8 @@ export class Body{
         this.width = width
         this.initialVelocity = initialVelocity
         this.isStatic = isStatic
-        this.calculateBounds()
-        this.points = this.calculateShapeVectors(4)
-        
-        let topRightCorner = new Point(this.bounds.x.max, this.bounds.y.max) 
-        let bottomRightCorner = new Point(this.bounds.x.max, this.bounds.y.min)
-        let topLeftCorner = new Point(this.bounds.x.min, this.bounds.y.max)
-        let bottomLeftCorner = new Point(this.bounds.x.min, this.bounds.y.min)
-        this.edgePoints = [topRightCorner, bottomRightCorner, topLeftCorner, bottomLeftCorner]
-        this.edges = [new Edge(topRightCorner, bottomRightCorner, 90), new Edge(bottomRightCorner, bottomLeftCorner, 0),
-             new Edge(bottomLeftCorner, topLeftCorner, 0), new Edge(topLeftCorner, topRightCorner, 90)]
+        this.calculateShapeVectors(4)
+        this.calculateTransformedShapeVectors()
     }
 
     calculateShapeVectors = (sides: number) => {
@@ -83,47 +50,63 @@ export class Body{
             let resulty = r * Math.round(evaluate(`sin(${theta*i} deg)`))
             points.push(new Point(resultx, resulty))
         }
-        // console.log(points)
-        return points
-
+        this.points = points
     }
 
-    calculateBounds = () =>{
-        this.bounds = {
-            x: {min: (this.distanceX - (this.width/2)), max: (this.distanceX + (this.width/2))},
-            y: {min: (this.distanceY - (this.height/2)), max: (this.distanceY + (this.height/2))}
+    calculateTransformedShapeVectors = () =>{
+        let points = []
+        let origin = new Point(this.distanceX, this.distanceY)
+        for(let i = 0; i < this.points.length; i++){
+            let point = this.points[i]
+            let transformedPoint = new Point(origin.x + point.x, origin.y + point.y)
+            points.push(transformedPoint)
         }
+        this.transformedPoints = points
     }
-
 }
 
 export class CollisionDetector{
 
     createAxisFromEdge = (edge: Edge) => {
-        // console.log("edge", edge)
-        let axisProj = new Point(-(edge.a.y - edge.b.y), (edge.a.x - edge.b.x))
-        // console.log("projection", axisProj)
-        let axis = new Vector(10, edge.angle - 90)
-        // let projectedlength = edgeLength*Math.floor(evaluate(`cos(${axis.angle} deg)`))
-        return axis
+        let axisProj = new Point(-(edge.b.y - edge.a.y), (edge.b.x - edge.a.x))
+        return axisProj
 
     }
 
-    run = (bodies: Array<Body>) =>{
+    detectOverlap_SAT = (body1: Body, body2: Body) => {
 
-        // for(let i = 0; i < bodies.length; i++){
-        //     let body = bodies[i]
-        //     this.createAxisFromEdge(body.edges[0])
-        //     }
-        let edges = []
-        let body = bodies[0]
-        for(let a = 0; a < body.points.length; a++){
-            let point1 = body.points[a]
-            let point2 = body.points[(a+1) % body.points.length]
-            let edge = {x:(point2.x - point1.x), y:(point2.y, point1.y)}
-            edges.push(edge)
+        for(let i = 0; i < body1.points.length; i++){
+            let pointA = body1.points[i]
+            let pointB = body1.points[(i+1)% body1.points.length]
+            console.log("Point A", pointA)
+            console.log("Point B", pointB)
+            let edge = new Edge(pointA, pointB)
+            let axixProj = this.createAxisFromEdge(edge)
+            console.log(axixProj)
         }
-        console.log(edges)
+        console.log("===================")
+        
+        for(let i = 0; i < body1.transformedPoints.length; i++){
+            let pointA = body1.transformedPoints[i]
+            let pointB = body1.transformedPoints[(i+1)% body1.transformedPoints.length]
+            console.log("Point A", pointA)
+            console.log("Point B", pointB)
+            let edge = new Edge(pointA, pointB)
+            let axixProj = this.createAxisFromEdge(edge)
+            console.log(axixProj)
+        }
+    }
+
+    run = (bodies: Array<Body>) =>{
+        let edges = []
+        let body1 = bodies[0]
+        let body2 = bodies[1]
+        this.detectOverlap_SAT(body1, body2)
+        // for(let a = 0; a < body.points.length; a++){
+        //     let point1 = body.points[a]
+        //     let point2 = body.points[(a+1) % body.points.length]
+        //     let edge = {x:(point2.x - point1.x), y:(point2.y, point1.y)}
+        // }
 
         
     }
@@ -145,6 +128,7 @@ export class Engine{
         var timedelta = Date.now() - this.start;
         var displacement = (body.initialVelocity * (timedelta/1000)) + (.5*-9.8*Math.pow((timedelta/1000), 2))
         body.distanceY += displacement
+        body.calculateTransformedShapeVectors()
     }
 
     run = () => {
@@ -155,7 +139,6 @@ export class Engine{
                 continue
             }
             this.calculateDisplacement(body)
-            body.calculateBounds()
         }
     }
 }
@@ -209,34 +192,22 @@ export class Renderer{
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.drawAxis()
-        this.drawShape(this.engine.bodies[0])
         for (let i=0; i < bodies.length; i++){
             let body = bodies[i]
-            let positionX = this.metersToPixelsDistanceX(body.distanceX)
-            let positionY = this.metersToPixelsDistanceY(body.distanceY)
-            let widthPixels = (body.width * this.heightRatio)
-            let heightPixels = (body.height * this.heightRatio)
-
-
-            let params = fillrectTranslator(positionX, positionY, widthPixels, heightPixels)
-            
-            this.ctx.fillStyle = "#000000";
+            this.drawShape(body)
         }
     
         window.requestAnimationFrame(this.run)
     }
 
     drawShape = (body: Body) => {
-        let points = body.points
-        let origin = new Point(body.distanceX, body.distanceY)
+        let points = body.transformedPoints
         for(let i = 0; i < points.length; i++){
             let pointA = points[i]
             let pointB = points[(i + 1) % points.length]
-            let pointA2 = new Point(origin.x + pointA.x, origin.y + pointA.y)
-            let pointB2 = new Point(origin.x + pointB.x, origin.y + pointB.y)
             this.ctx.beginPath();
-            this.ctx.moveTo(this.metersToPixelsDistanceX(pointA2.x), this.metersToPixelsDistanceY(pointA2.y))
-            this.ctx.lineTo(this.metersToPixelsDistanceX(pointB2.x), this.metersToPixelsDistanceY(pointB2.y))
+            this.ctx.moveTo(this.metersToPixelsDistanceX(pointA.x), this.metersToPixelsDistanceY(pointA.y))
+            this.ctx.lineTo(this.metersToPixelsDistanceX(pointB.x), this.metersToPixelsDistanceY(pointB.y))
             this.ctx.stroke()
         }
     }
@@ -286,33 +257,33 @@ export class Renderer{
         }
     }
 
-    highlightBounds = (body: Body) =>{
-        this.ctx.fillStyle = "#FF0000";
+    // highlightBounds = (body: Body) =>{
+    //     this.ctx.fillStyle = "#FF0000";
         
-        let params = fillrectTranslator(this.metersToPixelsDistanceX(body.distanceX), this.metersToPixelsDistanceY(body.distanceY), 4, 4)
-        this.ctx.fillRect(params.x, params.y, params.w, params.h)
+    //     let params = fillrectTranslator(this.metersToPixelsDistanceX(body.distanceX), this.metersToPixelsDistanceY(body.distanceY), 4, 4)
+    //     this.ctx.fillRect(params.x, params.y, params.w, params.h)
 
-        let boundx = this.metersToPixelsDistanceX(body.bounds.x.min)
-        let boundy = this.metersToPixelsDistanceY(body.distanceY)
-        params = fillrectTranslator(boundx, boundy, 4, 4)
-        this.ctx.fillRect(params.x, params.y, params.w, params.h)
+    //     let boundx = this.metersToPixelsDistanceX(body.bounds.x.min)
+    //     let boundy = this.metersToPixelsDistanceY(body.distanceY)
+    //     params = fillrectTranslator(boundx, boundy, 4, 4)
+    //     this.ctx.fillRect(params.x, params.y, params.w, params.h)
 
-        boundx = this.metersToPixelsDistanceX(body.distanceX)
-        boundy = this.metersToPixelsDistanceY(body.bounds.y.min)
-        params = fillrectTranslator(boundx, boundy, 4, 4)
-        this.ctx.fillRect(params.x, params.y, params.w, params.h)
+    //     boundx = this.metersToPixelsDistanceX(body.distanceX)
+    //     boundy = this.metersToPixelsDistanceY(body.bounds.y.min)
+    //     params = fillrectTranslator(boundx, boundy, 4, 4)
+    //     this.ctx.fillRect(params.x, params.y, params.w, params.h)
 
-        boundx = this.metersToPixelsDistanceX(body.bounds.x.max)
-        boundy = this.metersToPixelsDistanceY(body.distanceY)
-        params = fillrectTranslator(boundx, boundy, 4, 4)
-        this.ctx.fillRect(params.x, params.y, params.w, params.h)
+    //     boundx = this.metersToPixelsDistanceX(body.bounds.x.max)
+    //     boundy = this.metersToPixelsDistanceY(body.distanceY)
+    //     params = fillrectTranslator(boundx, boundy, 4, 4)
+    //     this.ctx.fillRect(params.x, params.y, params.w, params.h)
 
-        boundx = this.metersToPixelsDistanceX(body.distanceX)
-        boundy = this.metersToPixelsDistanceY(body.bounds.y.max)
-        params = fillrectTranslator(boundx, boundy, 4, 4)
-        this.ctx.fillRect(params.x, params.y, params.w, params.h)
+    //     boundx = this.metersToPixelsDistanceX(body.distanceX)
+    //     boundy = this.metersToPixelsDistanceY(body.bounds.y.max)
+    //     params = fillrectTranslator(boundx, boundy, 4, 4)
+    //     this.ctx.fillRect(params.x, params.y, params.w, params.h)
 
-    }
+    // }
     
 
 }
