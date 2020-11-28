@@ -108,7 +108,10 @@ export class CollisionDetector{
     }
 
     boundsOverlap = (body1Bounds: Bounds, body2Bounds: Bounds) => {
-        if((body1Bounds.min < body2Bounds.max && body1Bounds.min > body2Bounds.min) || (body1Bounds.max > body2Bounds.min && body1Bounds.max < body2Bounds.max)){
+        if((body1Bounds.min < body2Bounds.max && body1Bounds.min > body2Bounds.min)
+         || (body1Bounds.max > body2Bounds.min && body1Bounds.max < body2Bounds.max)
+         || (body2Bounds.min < body1Bounds.max && body2Bounds.min > body1Bounds.min)
+         || (body2Bounds.max > body1Bounds.min && body2Bounds.max < body1Bounds.max)){
             return true
         }else{
             return false
@@ -144,6 +147,7 @@ export class CollisionDetector{
             let body1Bounds = new Bounds(body1_min, body1_max)
             let body2Bounds = new Bounds(body2_min, body2_max)
             let boundsOverlap = this.boundsOverlap(body1Bounds, body2Bounds)
+
             if(!boundsOverlap){
                 collision = false
                 break
@@ -181,6 +185,7 @@ export class CollisionDetector{
                 collision = false
                 break
             }
+            // console.log("-")
         }
         return collision
     }
@@ -191,7 +196,7 @@ export class CollisionDetector{
         let collision = this.detectCollision_SAT(body1, body2)
         console.log("collision", collision)
         if(collision){
-            alert("COLLISION BITCHES!!!")
+            body2.isStatic = true
         }
         
     }
@@ -211,7 +216,7 @@ export class Engine{
 
     calculateDisplacement = (body: Body) => {
         var timedelta = Date.now() - this.start;
-        var displacement = (body.initialVelocity * (timedelta/1000)) + (.5*-9.8*Math.pow((timedelta/1000), 2))
+        var displacement = (body.initialVelocity * (timedelta/1000)) + (.5*-0.8*Math.pow((timedelta/1000), 2))
         body.distanceY += displacement
         body.update()
     }
