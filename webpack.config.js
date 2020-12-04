@@ -1,13 +1,17 @@
-const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
 let entrypoint = JSON.parse(process.env.npm_config_argv)["cooked"].pop()
+const dist = path.resolve(__dirname, "dist");
+
 module.exports = {
-  devtool: "eval-source-map",
-  entry: [`./${entrypoint}/index.ts`],
+  mode: "production",
+  entry: {
+    index: `./${entrypoint}/index.ts`
+  },
   output: {
-    path: path.resolve(__dirname, "dist"),
-    filename: "index.bundle.js",
-    publicPath: "/"
+    path: dist,
+    filename: "[name].js"
   },
   module: {
     rules: [
@@ -20,26 +24,22 @@ module.exports = {
           },
       }],
         exclude: /node_modules/
-      },
-      {
-        test: /\.html$/,
-        loader: 'html-loader',
-        exclude: /node_modules/
-      },
-      {
-        test: /\.(png|svg|jpg|gif)$/,
-        use: ['file-loader'],
-        exclude: /node_modules/
       }
     ],
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".html", ".jpg"],
   },
-  plugins: [new HtmlWebpackPlugin({ template: "./index.html" })],
   devServer: {
     contentBase: [
         path.resolve(__dirname, `./${entrypoint}`)
     ]
-}
+  },
+  plugins: [
+    new HtmlWebpackPlugin({ template: "./index.html" }),
+
+    new WasmPackPlugin({
+      crateDirectory: __dirname,
+    }),
+  ]
 };

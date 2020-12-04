@@ -2,9 +2,8 @@
   "compilerOptions": {
     "outDir": "./dist/assets/js/",
     "noImplicitAny": false,
-    "module": "commonjs",
+    "module": "esNext",
     "moduleResolution": "node",
     "target": "es5"
-  },
-  "files": ["index.ts"]
+  }
 }
