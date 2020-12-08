@@ -5,9 +5,13 @@ let entrypoint = JSON.parse(process.env.npm_config_argv)["cooked"].pop()
 const dist = path.resolve(__dirname, "dist");
 
 module.exports = {
+  context: path.resolve(__dirname, `${entrypoint}`),
+  experiments: {
+    asyncWebAssembly: true
+  },
   mode: "production",
   entry: {
-    index: `./${entrypoint}/index.ts`
+    index: `./index.ts`
   },
   output: {
     path: dist,
@@ -31,15 +35,17 @@ module.exports = {
     extensions: [".ts", ".tsx", ".js", ".html", ".jpg"],
   },
   devServer: {
+    writeToDisk: true,
     contentBase: [
         path.resolve(__dirname, `./${entrypoint}`)
     ]
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: "./index.html" }),
+    new HtmlWebpackPlugin({ template: "../index.html" }),
 
     new WasmPackPlugin({
       crateDirectory: __dirname,
+      outDir: `./${entrypoint}/pkg`
     }),
   ]
 };
