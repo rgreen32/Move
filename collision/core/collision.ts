@@ -95,9 +95,9 @@ export default class CollisionDetector{
     run = (bodies: Array<Body>) =>{
         let body1 = bodies[0]
         let body2 = bodies[1]
-        wasm.detect_collision_SAT(body1)
-        let collision = this.detectCollision_SAT(body1, body2)
-        console.log("collision", collision)
+
+        let collision = wasm.detect_collision_SAT(body1, body2)
+
         if(collision){
             body2.isStatic = true
         }
