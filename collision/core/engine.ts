@@ -1,5 +1,10 @@
 import CollisionDetector from "./collision"
 import Body from "./body"
+import wasm from "../init"
+
+let engine = new wasm.Engine()
+
+
 
 export default class Engine{
     bodies: Array<Body>
@@ -19,13 +24,18 @@ export default class Engine{
     }
 
     run = () => {
+
+
         this.collisionDetector.run(this.bodies)
         for (let i=0; i < this.bodies.length; i++){
             let body = this.bodies[i]
             if(body.isStatic == true){
                 continue
             }
-            this.calculateDisplacement(body)
+
+            let displacement = engine.calculate_displacement(body)
+            body.distanceY += displacement
+            body.update()
         }
     }
 }

@@ -1,8 +1,12 @@
-use std::f64::INFINITY;
-
+use std::{f64::INFINITY, time::SystemTime};
+// use chrono::{DateTime, offset};
+// use std::time::{Duration, Instant};
+use std::time::{Instant, UNIX_EPOCH, Duration};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use web_sys::console;
+// use js_sys::*;
+
 
 // When the `wee_alloc` feature is enabled, this uses `wee_alloc` as the global
 // allocator.
@@ -21,8 +25,9 @@ extern "C" {
     fn log_object(obj: &JsValue);
 
     #[wasm_bindgen(js_namespace = console, js_name = log)]
-    fn log_num(num: u32);
+    fn log_num(num: u64);
 }
+
 
 // This is like the `main` function, except for JavaScript.
 #[wasm_bindgen(start)]
@@ -75,10 +80,11 @@ pub struct Body {
     pub transformedEdges: Vec<Edge>,
 }
 
-#[wasm_bindgen]
-pub fn test_function(string: &str) {
-    log(&format!("This is from Rust: {}.", string))
-}
+// impl Body {
+//     fn update(&self){
+
+//     }
+// }
 
 pub fn createAxisFromEdge(edge: &Edge) -> Point {
     let axis_proj = Point {
@@ -99,6 +105,33 @@ pub fn bounds_overlap(body1_bounds: &Bounds, body2_bounds: &Bounds) -> bool {
         return false;
     }
 }
+
+#[wasm_bindgen]
+pub struct Engine {
+    time_delta_root: f64,
+    bodies: Vec<Body>
+}
+
+#[wasm_bindgen]
+impl Engine {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Engine{
+        Engine {time_delta_root: js_sys::Date::now(), bodies: vec![]}
+    }
+
+    pub fn calculate_displacement(&mut self, body: &JsValue) -> f64 {
+        let body: Body = body.into_serde().unwrap();
+        let now = js_sys::Date::now();
+        let time_delta = ((now - self.time_delta_root))/(1000 as f64);
+        let displacement = ((body.initialVelocity as f64) * time_delta + (0.5*-9.8*time_delta.powi(2)));
+        // self.time_delta_root = now;
+        // body.distanceY += displacement;
+        // body.update();
+
+        return displacement as f64;
+    }
+}
+
 
 #[wasm_bindgen]
 pub fn detect_collision_SAT(body1: &JsValue, body2: &JsValue) -> bool {

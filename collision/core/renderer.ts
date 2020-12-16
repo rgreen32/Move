@@ -42,11 +42,9 @@ export default class Renderer{
     
 
     run = () => {
-        this.engine.run()
-        let bodies = this.engine.bodies
-        
+        this.engine.run()    
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
+        let bodies = this.engine.bodies
         this.drawAxis()
         for (let i=0; i < bodies.length; i++){
             let body = bodies[i]
