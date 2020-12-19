@@ -1,5 +1,8 @@
 import Engine from "./engine"
 import Body from "./body"
+import wasm from "../init"
+
+let wasm_engine = new wasm.Engine()
 
 export default class Renderer{
     canvas: HTMLCanvasElement;
