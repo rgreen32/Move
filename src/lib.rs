@@ -2,6 +2,7 @@ mod engine;
 mod body;
 mod collision;
 mod geometry;
+mod renderer;
 use std::{f64::INFINITY};
 
 use wasm_bindgen::prelude::*;
@@ -30,7 +31,7 @@ extern "C" {
     fn log_object(obj: &JsValue);
 
     #[wasm_bindgen(js_namespace = console, js_name = log)]
-    fn log_num(num: u64);
+    fn log_num(num: u32);
 }
 
 

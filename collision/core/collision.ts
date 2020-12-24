@@ -11,9 +11,9 @@ export default class CollisionDetector{
 
         // let collision = wasm.detect_collision_SAT(body1, body2)
 
-        if(collision){
-            body2.isStatic = true
-        }
+        // if(collision){
+        //     body2.isStatic = true
+        // }
         
     }
 }

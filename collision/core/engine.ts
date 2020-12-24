@@ -2,7 +2,7 @@ import CollisionDetector from "./collision"
 import Body from "./body"
 import wasm from "../init"
 
-let engine = new wasm.Engine()
+// let engine = new wasm.Engine()
 
 
 
@@ -33,9 +33,9 @@ export default class Engine{
                 continue
             }
 
-            let displacement = engine.calculate_displacement(body)
-            body.distanceY += displacement
-            body.update()
+            let displacement = this.calculateDisplacement(body)
+            // body.distanceY += displacement
+            // body.update()
         }
     }
 }

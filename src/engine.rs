@@ -1,5 +1,5 @@
 use wasm_bindgen::prelude::*;
-use crate::body::{self, Body};
+use crate::body::{Body};
 use crate::collision::CollisionDetector;
 #[wasm_bindgen]
 pub struct Engine {
@@ -9,11 +9,12 @@ pub struct Engine {
 }
 
 
-// #[wasm_bindgen]
+#[wasm_bindgen]
 impl Engine {
-    // #[wasm_bindgen(constructor)]
-    pub fn new() -> Engine{
-        Engine {time_delta_root: js_sys::Date::now(), bodies: vec![], collision_detector: CollisionDetector{}}
+    #[wasm_bindgen(constructor)]
+    pub fn new(bodies: &JsValue) -> Engine{
+        let bodies: Vec<Body> = bodies.into_serde().unwrap();
+        Engine {time_delta_root: js_sys::Date::now(), bodies: bodies, collision_detector: CollisionDetector{}}
     }
 
     fn calculate_displacement(&mut self, body: &Body) -> f32 {
