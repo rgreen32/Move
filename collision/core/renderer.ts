@@ -48,7 +48,7 @@ export default class Renderer{
         this.engine.run()    
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         let bodies = this.engine.bodies
-        this.drawAxis()
+        // this.drawAxis()
         for (let i=0; i < bodies.length; i++){
             let body = bodies[i]
             this.drawShape(body)
