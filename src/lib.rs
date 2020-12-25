@@ -3,6 +3,7 @@ mod body;
 mod collision;
 mod geometry;
 mod renderer;
+mod simulation_runner;
 use std::{f64::INFINITY};
 
 use wasm_bindgen::prelude::*;
