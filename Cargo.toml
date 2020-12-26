@@ -22,6 +22,7 @@ lto = true
 #default = ["wee_alloc"]
 
 [dependencies]
+libm = "0.2.1"
 js-sys = "0.3.46"
 # The `wasm-bindgen` crate provides the bare minimum functionality needed
 # to interact with JavaScript.

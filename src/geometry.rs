@@ -5,7 +5,7 @@ pub struct Bounds {
     pub min: f64,
     pub max: f64,
 }
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize, Clone, Copy)]
 pub struct Point {
     pub x: f64,
     pub y: f64,
@@ -17,8 +17,8 @@ impl Point {
         return scalar;
     }
 }
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Edge {
+#[derive( Deserialize)]
+pub struct Edge{
     pub a: Point,
-    pub b: Point,
+    pub b:  Point,
 }
