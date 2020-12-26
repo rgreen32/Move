@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 use crate::geometry::{Point, Edge};
 use std::f64::consts::{PI};
 use libm::{cos, sin};
+use std::iter::FromIterator;
+
 
 #[derive(Deserialize)]
 pub struct Body {
@@ -20,6 +22,12 @@ pub struct Body {
 }
 
 impl Body{
+
+    pub fn init(&mut self){
+        self.calculate_shape_vectors();
+        self.calculate_transformed_shape_vectors();
+        self.calculate_transformed_edges();
+    }
 
     pub fn update(&mut self){
         self.calculate_transformed_shape_vectors();
@@ -58,3 +66,25 @@ impl Body{
         }
     }
 }
+
+// pub struct MyCollection(Vec<Body>);
+
+// impl MyCollection{
+//     fn new() -> MyCollection {
+//         MyCollection(Vec::new())
+//     }
+
+//     fn add(&mut self, elem: Body) {
+//         self.0.push(elem)
+// }
+// }
+
+// impl FromIterator<Body> for MyCollection{
+//     fn from_iter<T: IntoIterator<Item = Body>>(iter: T) -> Self {
+//         let mut c = MyCollection::new();
+//         for i in iter {
+//             c.add(i);
+//         }
+//         return c;
+//     }
+// }

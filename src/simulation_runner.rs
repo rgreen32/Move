@@ -53,7 +53,7 @@ impl SimulationRunner{
         .unwrap();
 
         let bodies: Vec<Body> = bodies.into_serde().unwrap();
-        let engine = Engine {time_delta_root: js_sys::Date::now(), bodies: bodies, collision_detector: CollisionDetector{}};
+        let engine = Engine {time_delta_root: js_sys::Date::now(), bodies: bodies.iter_mut().map(|x| x.init()).rev().collect(), collision_detector: CollisionDetector{}};
 
         let renderer = Renderer {
             window: window,
