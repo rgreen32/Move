@@ -13,6 +13,7 @@ var bodies = [block, block2]
 // let renderer2 = new wasm.Renderer("canvas", engine2)
 
 let runner = new wasm.SimulationRunner("canvas", bodies)
+runner.start()
 // renderer2.run()
 // var engine = new Engine(bodies)
 // var renderer = new Renderer(canvas, engine)

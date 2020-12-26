@@ -32,7 +32,7 @@ extern "C" {
     fn log_object(obj: &JsValue);
 
     #[wasm_bindgen(js_namespace = console, js_name = log)]
-    fn log_num(num: u32);
+    fn log_num(num: f32);
 }
 
 
@@ -43,9 +43,6 @@ pub fn main_js() -> Result<(), JsValue> {
     // It's disabled in release mode so it doesn't bloat up the file size.
     #[cfg(debug_assertions)]
     console_error_panic_hook::set_once();
-
-    // console::log_1(&JsValue::from_str("Hello world! tesssies"));
-
     Ok(())
 }
 

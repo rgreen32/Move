@@ -1,12 +1,10 @@
 use core::panic;
-use wasm_bindgen::prelude::*;
-use web_sys::{HtmlCanvasElement, CanvasRenderingContext2d, window};
+use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, Window, window};
 use crate::{body::Body, engine::Engine};
 use wasm_bindgen::JsCast;
-use crate::{log};
-
 
 pub struct Renderer {
+    pub window: Window,
     pub canvas_id: String,
     pub engine: Engine,
     pub canvas_width: u32, //added width and height fields because HTMLCanvas cant be saved to a field atm.
@@ -19,11 +17,11 @@ pub struct Renderer {
     pub widthRatio: u32
 }
 
-// #[wasm_bindgen]
 impl Renderer {
     // #[wasm_bindgen(constructor)] //Why does compiler panic when self param is added here?
     pub fn new(canvas_id: &str, engine: Engine) -> Renderer{
         let window = window().unwrap();
+
         let document = window.document().unwrap();
 
         let canvas: HtmlCanvasElement = document.get_element_by_id(canvas_id)
@@ -49,9 +47,8 @@ impl Renderer {
         .dyn_into::<CanvasRenderingContext2d>()
         .unwrap();
 
-        // Renderer::draw_axis();
-
         Renderer {
+            window: window,
             canvas_id: String::from(canvas_id),
             engine: engine, 
             ctx: ctx, 
@@ -62,17 +59,24 @@ impl Renderer {
             widthRatio: (canvas.width()/2/(100 * (canvas.width()/canvas.height()))),
             canvas_width: canvas_width,
             canvas_height: canvas_height
-        }
+        } 
     }
     
-    pub fn run(&self){
+
+    pub fn run(&mut self){
+        self.engine.run();
+        // let bodies = &self.engine.bodies;
+        self.ctx.clear_rect(0.0, 0.0, self.canvas_width as f64, self.canvas_height as f64);
         self.draw_axis();
-        // self.ctx.clear_rect(0.0, 0.0, self.canvas_width as f64, self.canvas_height as f64);
+        for body in &self.engine.bodies{
+            self.draw_shape(&body);
+        }
+
     }
 
 
-    fn draw_shape(&self, body: Body){
-        let points = body.transformedPoints;
+    fn draw_shape(&self, body: &Body){
+        let points = &body.transformedPoints;
         for (i, pointA) in points.iter().enumerate(){
             let pointB = &points[(i + 1) % points.len()];
             self.ctx.begin_path();
@@ -103,7 +107,6 @@ impl Renderer {
 
 
     fn draw_axis(&self){
-        // log("Hellerr...");
         let canvas_width = self.canvas_width as f64;
         let canvas_height = self.canvas_height as f64;
         self.ctx.begin_path();

@@ -1,12 +1,19 @@
 use wasm_bindgen::prelude::*;
-use crate::renderer::Renderer;
+use std::{cell::RefCell, rc::Rc};
+use crate::{log, renderer::Renderer};
 use crate::engine::Engine;
 use crate::body::Body;
 use core::panic;
 use web_sys::{HtmlCanvasElement, CanvasRenderingContext2d, window};
 use crate::collision::CollisionDetector;
 use wasm_bindgen::JsCast;
-// use serde::{Serialize, Deserialize};
+
+
+fn request_animation_frame(f: &Closure<dyn FnMut()>) {
+    window().expect("no global `window` exists")
+        .request_animation_frame(f.as_ref().unchecked_ref())
+        .expect("should register `requestAnimationFrame` OK");
+}
 
 
 #[wasm_bindgen]
@@ -49,6 +56,7 @@ impl SimulationRunner{
         let engine = Engine {time_delta_root: js_sys::Date::now(), bodies: bodies, collision_detector: CollisionDetector{}};
 
         let renderer = Renderer {
+            window: window,
             canvas_id: String::from(canvas_id),
             engine: engine, 
             ctx: ctx, 
@@ -61,9 +69,19 @@ impl SimulationRunner{
             canvas_height: canvas_height
         };
 
-        renderer.run();
-
-
         return SimulationRunner{renderer: renderer}
+    }
+
+    pub fn start(mut self){
+        let f = Rc::new(RefCell::new(None));
+        let g = f.clone();
+        *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
+            // log("Heyya..");
+            self.renderer.run();
+            request_animation_frame(f.borrow().as_ref().unwrap());
+        }) as Box<dyn FnMut()>));
+
+        request_animation_frame(g.borrow().as_ref().unwrap());
+
     }
 }
