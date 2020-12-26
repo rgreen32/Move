@@ -6,10 +6,13 @@ pub struct CollisionDetector{
 }
 
 impl CollisionDetector{
-    pub fn run(&self, bodies: &Vec<Body>) {
-        let body1 = &bodies[0];
-        let body2 = &bodies[1];
-
+    pub fn run(&self, bodies: &mut Vec<Body>) {
+        let collision = CollisionDetector::detect_collision_SAT(bodies);
+        if collision{
+            let body1 = &mut bodies[0];
+            let body2 = &mut bodies[1];
+            body2.isStatic = true
+        }
     }
     
     fn createAxisFromEdge(edge: &Edge) -> Point {
@@ -22,10 +25,9 @@ impl CollisionDetector{
 
 
 
-    fn detect_collision_SAT(body1: &Body, body2: &Body) -> bool {
-        // log("This is from SAT function.");
-        // let body1: Body = body1.into_serde().unwrap();
-        // let body2: Body = body2.into_serde().unwrap();
+    fn detect_collision_SAT(bodies: &Vec<Body>) -> bool {
+        let body1 = &bodies[0];
+        let body2 = &bodies[1];
 
         let mut collision = true;
         for edge in body1.transformedEdges.iter() {

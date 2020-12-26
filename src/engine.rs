@@ -23,7 +23,7 @@ impl Engine {
     }
 
     pub fn run(&mut self){
-        self.collision_detector.run(&self.bodies);
+        self.collision_detector.run(&mut self.bodies);
         for mut body in &mut self.bodies.iter_mut(){
             if body.isStatic == true {
                 continue;
