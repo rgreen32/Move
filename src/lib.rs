@@ -32,7 +32,10 @@ extern "C" {
     fn log_object(obj: &JsValue);
 
     #[wasm_bindgen(js_namespace = console, js_name = log)]
-    fn log_num(num: f32);
+    fn log_num(num: f64);
+
+    #[wasm_bindgen(js_namespace = console, js_name = log)]
+    fn log_bool(num: bool);
 }
 
 

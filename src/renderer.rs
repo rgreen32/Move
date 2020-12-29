@@ -1,7 +1,7 @@
 use core::panic;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, Window, window};
-use crate::{body::Body, engine::Engine};
-use wasm_bindgen::JsCast;
+use crate::{body::{self, Body}, engine::Engine};
+use crate::{log, log_num};
 
 pub struct Renderer {
     pub window: Window,
@@ -19,59 +19,14 @@ pub struct Renderer {
 
 impl Renderer {
     // #[wasm_bindgen(constructor)] //Why does compiler panic when self param is added here?
-    pub fn new(canvas_id: &str, engine: Engine) -> Renderer{
-        let window = window().unwrap();
-
-        let document = window.document().unwrap();
-
-        let canvas: HtmlCanvasElement = document.get_element_by_id(canvas_id)
-            .unwrap()
-            .dyn_into::<HtmlCanvasElement>()
-            .map_err(|_| ())
-            .unwrap();
-        let canvas_width: u32 = match window.inner_width() {
-            Ok(JsValue) => JsValue.into_serde().unwrap(),
-            Err(error) => panic!("problem getting window width..")
-        };
-        let canvas_height: u32 = match window.inner_height() {
-            Ok(JsValue) => JsValue.into_serde().unwrap(),
-            Err(error) => panic!("problem getting window height..")
-        };
-        canvas.set_width(canvas_width);
-        canvas.set_height(canvas_height);
-
-
-        let ctx: CanvasRenderingContext2d = canvas.get_context("2d")
-        .unwrap()
-        .unwrap()
-        .dyn_into::<CanvasRenderingContext2d>()
-        .unwrap();
-
-        Renderer {
-            window: window,
-            canvas_id: String::from(canvas_id),
-            engine: engine, 
-            ctx: ctx, 
-            windowRatio: canvas.width(), 
-            Y_AxisDistance: 100, 
-            X_AxisDistance: (100 * (canvas.width()/canvas.height())),
-            heightRatio: (canvas.height()/100), 
-            widthRatio: (canvas.width()/2/(100 * (canvas.width()/canvas.height()))),
-            canvas_width: canvas_width,
-            canvas_height: canvas_height
-        } 
-    }
-    
 
     pub fn run(&mut self){
         self.engine.run();
-        // let bodies = &self.engine.bodies;
         self.ctx.clear_rect(0.0, 0.0, self.canvas_width as f64, self.canvas_height as f64);
         self.draw_axis();
         for body in &self.engine.bodies{
             self.draw_shape(&body);
         }
-
     }
 
 

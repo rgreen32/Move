@@ -1,5 +1,6 @@
 use crate::Body;
 use crate::{Edge, Point, Bounds};
+use crate::{log, log_bool};
 use std::{f64::INFINITY};
 pub struct CollisionDetector{
 
@@ -31,7 +32,6 @@ impl CollisionDetector{
 
         let mut collision = true;
         for edge in body1.transformedEdges.iter() {
-            // log(&format!("{:?}", edge));
             let axis_proj = Self::createAxisFromEdge(edge);
             let mut body1_min = INFINITY;
             let mut body1_max = -INFINITY;
@@ -71,7 +71,6 @@ impl CollisionDetector{
         }
         //project axis on to second body
         for edge in body2.transformedEdges.iter() {
-            // log(&format!("{:?}", edge));
             let axis_proj = Self::createAxisFromEdge(edge);
             let mut body1_min = INFINITY;
             let mut body1_max = -INFINITY;

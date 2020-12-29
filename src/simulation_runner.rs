@@ -1,20 +1,20 @@
 use wasm_bindgen::prelude::*;
-use std::{cell::RefCell, rc::Rc};
-use crate::{log, renderer::Renderer};
+use std::{cell::RefCell, iter::FromIterator, rc::Rc};
+use crate::{log, log_num, renderer::Renderer};
 use crate::engine::Engine;
 use crate::body::Body;
 use core::panic;
 use web_sys::{HtmlCanvasElement, CanvasRenderingContext2d, window};
 use crate::collision::CollisionDetector;
 use wasm_bindgen::JsCast;
-
+use crate::body::MyCollection;
+use std::vec::Vec;
 
 fn request_animation_frame(f: &Closure<dyn FnMut()>) {
-    window().expect("no global `window` exists")
+    window().expect("no global `window` exists") // is there a way to avoid calling this getter for every animation frame request?
         .request_animation_frame(f.as_ref().unchecked_ref())
         .expect("should register `requestAnimationFrame` OK");
 }
-
 
 #[wasm_bindgen]
 pub struct SimulationRunner {
@@ -53,7 +53,13 @@ impl SimulationRunner{
         .unwrap();
 
         let bodies: Vec<Body> = bodies.into_serde().unwrap();
-        let engine = Engine {time_delta_root: js_sys::Date::now(), bodies: bodies.iter_mut().map(|x| x.init()).rev().collect(), collision_detector: CollisionDetector{}};
+
+        let updated_bodies: Vec<Body> = bodies.into_iter().map(|mut x: Body| {
+            x.init();
+            return x;
+        }).collect::<Vec<Body>>();
+
+        let engine = Engine {time_delta_root: js_sys::Date::now(), bodies: updated_bodies, collision_detector: CollisionDetector{}};
 
         let renderer = Renderer {
             window: window,
@@ -73,10 +79,10 @@ impl SimulationRunner{
     }
 
     pub fn start(mut self){
+        self.renderer.run();
         let f = Rc::new(RefCell::new(None));
         let g = f.clone();
         *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
-            // log("Heyya..");
             self.renderer.run();
             request_animation_frame(f.borrow().as_ref().unwrap());
         }) as Box<dyn FnMut()>));

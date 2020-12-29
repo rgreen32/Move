@@ -1,11 +1,12 @@
 use serde::{Deserialize, Serialize};
+use wasm_bindgen::JsValue;
 use crate::geometry::{Point, Edge};
 use std::f64::consts::{PI};
 use libm::{cos, sin};
 use std::iter::FromIterator;
+use crate::{log, log_num, log_object};
 
-
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct Body {
     pub distanceX: f32,
     pub distanceY: f32,
@@ -34,17 +35,18 @@ impl Body{
         self.calculate_transformed_edges();
     }
 
-    fn calculate_shape_vectors(&self){
+    fn calculate_shape_vectors(&mut self){
         let theta = 360/self.sides;
-        let r = self.width;
+        let r = self.width/2.0;
         let mut points: Vec<Point> = vec![];
         for i in 0..self.sides{
-            let xcomponent = cos(((theta*i) as f64 + self.angle as f64)) * (PI/180.0);
+            let xcomponent = cos(((theta*i) as f64 + self.angle as f64) * (PI/180.0)) ;
             let resultx = r as f64 * xcomponent;
-            let ycomponent = sin(((theta*i) as f64 + self.angle as f64)) * (PI/180.0);
+            let ycomponent = sin(((theta*i) as f64 + self.angle as f64) * (PI/180.0)) ;
             let resulty = r as f64 * ycomponent;
             points.push(Point{x: resultx, y: resulty});
         }
+        self.points = points;
     }
 
     fn calculate_transformed_shape_vectors(&mut self){
@@ -57,34 +59,36 @@ impl Body{
         self.transformedPoints = points;
     }
 
-    fn calculate_transformed_edges(&self){
+    fn calculate_transformed_edges(&mut self){
         let mut edges: Vec<Edge> = vec![];
         for (i, point) in self.transformedPoints.iter().enumerate(){
             let pointA: Point = point.clone();
             let pointB = self.transformedPoints[(i + 1) % self.transformedPoints.len()];
             let edge = Edge{a: pointA, b: pointB};
+            edges.push(edge);
         }
+        self.transformedEdges = edges;
     }
 }
 
-// pub struct MyCollection(Vec<Body>);
+pub struct MyCollection(Vec<Body>);
 
-// impl MyCollection{
-//     fn new() -> MyCollection {
-//         MyCollection(Vec::new())
-//     }
+impl MyCollection{
+    fn new() -> MyCollection {
+        MyCollection(Vec::new())
+    }
 
-//     fn add(&mut self, elem: Body) {
-//         self.0.push(elem)
-// }
-// }
+    fn add(&mut self, elem: Body) {
+        self.0.push(elem)
+}
+}
 
-// impl FromIterator<Body> for MyCollection{
-//     fn from_iter<T: IntoIterator<Item = Body>>(iter: T) -> Self {
-//         let mut c = MyCollection::new();
-//         for i in iter {
-//             c.add(i);
-//         }
-//         return c;
-//     }
-// }
+impl FromIterator<Body> for MyCollection{
+    fn from_iter<T: IntoIterator<Item = Body>>(iter: T) -> Self {
+        let mut c = MyCollection::new();
+        for i in iter {
+            c.add(i);
+        }
+        return c;
+    }
+}
