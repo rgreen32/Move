@@ -7,7 +7,6 @@ use core::panic;
 use web_sys::{HtmlCanvasElement, CanvasRenderingContext2d, window};
 use crate::collision::CollisionDetector;
 use wasm_bindgen::JsCast;
-use crate::body::MyCollection;
 use std::vec::Vec;
 
 fn request_animation_frame(f: &Closure<dyn FnMut()>) {

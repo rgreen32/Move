@@ -1,6 +1,7 @@
 mod engine;
 mod body;
 mod collision;
+mod grid;
 mod geometry;
 mod renderer;
 mod simulation_runner;

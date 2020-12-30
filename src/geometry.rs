@@ -21,5 +21,5 @@ impl Point {
 #[derive(Debug, Deserialize)]
 pub struct Edge{
     pub a: Point,
-    pub b:  Point,
+    pub b: Point,
 }

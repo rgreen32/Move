@@ -62,33 +62,18 @@ impl Body{
     fn calculate_transformed_edges(&mut self){
         let mut edges: Vec<Edge> = vec![];
         for (i, point) in self.transformedPoints.iter().enumerate(){
-            let pointA: Point = point.clone();
+            let pointA: Point = point.clone(); //want to make these points into references to transformed points but then i would need to add liftime annotations, which conflicts heavily with deserialize trait.
             let pointB = self.transformedPoints[(i + 1) % self.transformedPoints.len()];
             let edge = Edge{a: pointA, b: pointB};
             edges.push(edge);
         }
         self.transformedEdges = edges;
     }
-}
 
-pub struct MyCollection(Vec<Body>);
-
-impl MyCollection{
-    fn new() -> MyCollection {
-        MyCollection(Vec::new())
-    }
-
-    fn add(&mut self, elem: Body) {
-        self.0.push(elem)
-}
-}
-
-impl FromIterator<Body> for MyCollection{
-    fn from_iter<T: IntoIterator<Item = Body>>(iter: T) -> Self {
-        let mut c = MyCollection::new();
-        for i in iter {
-            c.add(i);
+    fn calculate_spatial_mask(self){
+        let origin = Point{x: self.distanceX as f64, y: self.distanceY as f64};
+        for point in self.transformedPoints.iter(){
+            
         }
-        return c;
     }
 }
