@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::*;
-use std::{cell::RefCell, iter::FromIterator, rc::Rc};
-use crate::{log, log_num, renderer::Renderer};
+use std::{cell::RefCell, rc::Rc};
+use crate::{renderer::Renderer};
 use crate::engine::Engine;
 use crate::body::Body;
 use core::panic;
@@ -33,16 +33,16 @@ impl SimulationRunner{
             .dyn_into::<HtmlCanvasElement>()
             .map_err(|_| ())
             .unwrap();
-        let canvas_width: u32 = match window.inner_width() {
-            Ok(JsValue) => JsValue.into_serde().unwrap(),
-            Err(error) => panic!("problem getting window width..")
+        let window_width: u32 = match window.inner_width() {
+            Ok(window_width) => window_width.into_serde().unwrap(),
+            Err(_) => panic!("problem getting window width..")
         };
-        let canvas_height: u32 = match window.inner_height() {
-            Ok(JsValue) => JsValue.into_serde().unwrap(),
-            Err(error) => panic!("problem getting window height..")
+        let window_height: u32 = match window.inner_height() {
+            Ok(window_height) => window_height.into_serde().unwrap(),
+            Err(_) => panic!("problem getting window height..")
         };
-        canvas.set_width(canvas_width);
-        canvas.set_height(canvas_height);
+        canvas.set_width(window_width);
+        canvas.set_height(window_height);
 
 
         let ctx: CanvasRenderingContext2d = canvas.get_context("2d")
@@ -65,13 +65,13 @@ impl SimulationRunner{
             canvas_id: String::from(canvas_id),
             engine: engine, 
             ctx: ctx, 
-            windowRatio: canvas.width(), 
-            Y_AxisDistance: 100, 
-            X_AxisDistance: (100 * (canvas.width()/canvas.height())),
-            heightRatio: (canvas.height()/100), 
-            widthRatio: (canvas.width()/2/(100 * (canvas.width()/canvas.height()))),
-            canvas_width: canvas_width,
-            canvas_height: canvas_height
+            window_ratio: canvas.width(), 
+            y_axis_distance: 100, 
+            x_axis_distance: (100 * (canvas.width()/canvas.height())),
+            height_ratio: (canvas.height()/100), 
+            width_ratio: (canvas.width()/2/(100 * (canvas.width()/canvas.height()))),
+            canvas_width: window_width,
+            canvas_height: window_height
         };
 
         return SimulationRunner{renderer: renderer}

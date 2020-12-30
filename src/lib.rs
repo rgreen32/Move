@@ -5,13 +5,8 @@ mod grid;
 mod geometry;
 mod renderer;
 mod simulation_runner;
-use std::{f64::INFINITY};
-
 use wasm_bindgen::prelude::*;
-use web_sys::console;
-
 use crate::geometry::{Edge, Point, Bounds};
-
 use crate::body::Body;
 
 

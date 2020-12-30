@@ -1,25 +1,22 @@
-use serde::{Deserialize, Serialize};
-use wasm_bindgen::JsValue;
+use serde::Deserialize;
 use crate::geometry::{Point, Edge};
 use std::f64::consts::{PI};
 use libm::{cos, sin};
-use std::iter::FromIterator;
-use crate::{log, log_num, log_object};
 
 #[derive(Debug, Deserialize)]
 pub struct Body {
-    pub distanceX: f32,
-    pub distanceY: f32,
+    pub distance_x: f32,
+    pub distance_y: f32,
     pub mass: f32,
     pub height: f32,
     pub width: f32,
-    pub initialVelocity: f32,
-    pub isStatic: bool,
+    pub initial_velocity: f32,
+    pub is_static: bool,
     pub points: Vec<Point>,
     pub angle: f32,
     pub sides: u32,
-    pub transformedPoints: Vec<Point>,
-    pub transformedEdges: Vec<Edge>
+    pub transformed_points: Vec<Point>,
+    pub transformed_edges: Vec<Edge>
 }
 
 impl Body{
@@ -51,28 +48,28 @@ impl Body{
 
     fn calculate_transformed_shape_vectors(&mut self){
         let mut points: Vec<Point> = vec![];
-        let origin = Point{x: self.distanceX as f64, y: self.distanceY as f64};
+        let origin = Point{x: self.distance_x as f64, y: self.distance_y as f64};
         for point in self.points.iter(){
-            let transformedPoint = Point{x: origin.x + point.x, y: origin.y + point.y};
-            points.push(transformedPoint);
+            let transformed_point = Point{x: origin.x + point.x, y: origin.y + point.y};
+            points.push(transformed_point);
         }
-        self.transformedPoints = points;
+        self.transformed_points = points;
     }
 
     fn calculate_transformed_edges(&mut self){
         let mut edges: Vec<Edge> = vec![];
-        for (i, point) in self.transformedPoints.iter().enumerate(){
-            let pointA: Point = point.clone(); //want to make these points into references to transformed points but then i would need to add liftime annotations, which conflicts heavily with deserialize trait.
-            let pointB = self.transformedPoints[(i + 1) % self.transformedPoints.len()];
-            let edge = Edge{a: pointA, b: pointB};
+        for (i, point) in self.transformed_points.iter().enumerate(){
+            let point_a: Point = point.clone(); //want to make these points into references to transformed points but then i would need to add liftime annotations, which conflicts heavily with deserialize trait.
+            let point_b = self.transformed_points[(i + 1) % self.transformed_points.len()];
+            let edge = Edge{a: point_a, b: point_b};
             edges.push(edge);
         }
-        self.transformedEdges = edges;
+        self.transformed_edges = edges;
     }
 
     fn calculate_spatial_mask(self){
-        let origin = Point{x: self.distanceX as f64, y: self.distanceY as f64};
-        for point in self.transformedPoints.iter(){
+        // let origin = Point{x: self.distanceX as f64, y: self.distanceY as f64};
+        for point in self.transformed_points.iter(){
             
         }
     }

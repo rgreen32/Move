@@ -1,6 +1,5 @@
 use crate::Body;
 use crate::{Edge, Point, Bounds};
-use crate::{log, log_bool};
 use std::{f64::INFINITY};
 pub struct CollisionDetector{
 
@@ -12,11 +11,11 @@ impl CollisionDetector{
         if collision{
             let body1 = &mut bodies[0];
             let body2 = &mut bodies[1];
-            body2.isStatic = true
+            body2.is_static = true
         }
     }
     
-    fn createAxisFromEdge(edge: &Edge) -> Point {
+    fn create_axis_from_edge(edge: &Edge) -> Point {
         let axis_proj = Point {
             x: -(edge.b.y - edge.a.y),
             y: (edge.b.x - edge.a.x),
@@ -31,13 +30,13 @@ impl CollisionDetector{
         let body2 = &bodies[1];
 
         let mut collision = true;
-        for edge in body1.transformedEdges.iter() {
-            let axis_proj = Self::createAxisFromEdge(edge);
+        for edge in body1.transformed_edges.iter() {
+            let axis_proj = Self::create_axis_from_edge(edge);
             let mut body1_min = INFINITY;
             let mut body1_max = -INFINITY;
             let mut body2_min = INFINITY;
             let mut body2_max = -INFINITY;
-            for point in body1.transformedPoints.iter() {
+            for point in body1.transformed_points.iter() {
                 let scalar = axis_proj.dot(point);
                 if scalar < body1_min {
                     body1_min = scalar
@@ -46,7 +45,7 @@ impl CollisionDetector{
                     body1_max = scalar
                 }
             }
-            for point in body2.transformedPoints.iter() {
+            for point in body2.transformed_points.iter() {
                 let scalar = axis_proj.dot(point);
                 if scalar < body2_min {
                     body2_min = scalar;
@@ -70,13 +69,13 @@ impl CollisionDetector{
             }
         }
         //project axis on to second body
-        for edge in body2.transformedEdges.iter() {
-            let axis_proj = Self::createAxisFromEdge(edge);
+        for edge in body2.transformed_edges.iter() {
+            let axis_proj = Self::create_axis_from_edge(edge);
             let mut body1_min = INFINITY;
             let mut body1_max = -INFINITY;
             let mut body2_min = INFINITY;
             let mut body2_max = -INFINITY;
-            for point in body1.transformedPoints.iter() {
+            for point in body1.transformed_points.iter() {
                 let scalar = axis_proj.dot(point);
                 if scalar < body1_min {
                     body1_min = scalar
@@ -85,7 +84,7 @@ impl CollisionDetector{
                     body1_max = scalar
                 }
             }
-            for point in body2.transformedPoints.iter() {
+            for point in body2.transformed_points.iter() {
                 let scalar = axis_proj.dot(point);
                 if scalar < body2_min {
                     body2_min = scalar;
