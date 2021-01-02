@@ -1,18 +1,18 @@
-use crate::log;
+use crate::{log, log_num};
 use web_sys::{CanvasRenderingContext2d, Window};
 use crate::body::Body;
 use crate::engine::Engine;
 
 pub struct Renderer {
-    pub window: Window,
+    pub window: Window, //Research: what does it mean for a struct to own another struct versus hold a reference?
     pub canvas_id: String,
     pub engine: Engine,
     pub canvas_width: u32, //added width and height fields because HTMLCanvas cant be saved to a field atm.
     pub canvas_height: u32,
     pub ctx: CanvasRenderingContext2d,
     pub window_ratio: u32,
-    pub y_axis_distance: u32,
-    pub x_axis_distance: u32,
+    pub y_axis_length_meters: u32,
+    pub x_axis_length_meters: u32,
     pub height_ratio: u32,
     pub width_ratio: u32
 }
@@ -64,56 +64,53 @@ impl Renderer {
     fn draw_axis(&self){
         let canvas_width = self.canvas_width as f64;
         let canvas_height = self.canvas_height as f64;
+        
+        //draw y axis
         self.ctx.begin_path();
         self.ctx.move_to(canvas_width/2.0, 0.0);
         self.ctx.line_to(canvas_width/2.0, canvas_height);
         self.ctx.stroke();
 
+        //draw x axis
         self.ctx.move_to(0.0, canvas_height);
         self.ctx.line_to(canvas_width, canvas_height);
         self.ctx.stroke();
 
-        let ratio = (canvas_height)/self.y_axis_distance as f64;
+        let canvas_to_y_axis_ratio = (canvas_height)/self.y_axis_length_meters as f64;
+        let tick_spacing = 10.0;
+        let y_axis_number_of_ticks = canvas_height/(canvas_to_y_axis_ratio*tick_spacing);
+        let x_axis_number_ticks = (canvas_width/2.0)/tick_spacing;
+        let x_axis_center = canvas_width/2.0;
 
-        let mut count = canvas_height;
-        let mut i = 0;
-        while count > 0.0 {
-            self.ctx.move_to((canvas_width/2.0)-10.0, count);
-            self.ctx.line_to((canvas_width/2.0)+10.0, count);
+        for i in 0..y_axis_number_of_ticks as i32 {
+            let tick_margin = i as f64*(tick_spacing*canvas_to_y_axis_ratio);
+            let tick_x = x_axis_center;
+            let tick_y = canvas_height - tick_margin;
+            self.ctx.move_to(tick_x-10.0, tick_y);
+            self.ctx.line_to(tick_x+10.0, tick_y);
             self.ctx.stroke();
-            match self.ctx.fill_text(&i.to_string(), (canvas_width/2.0)+15.0, count+3.0){ //is there a shorthand for this err handling?
-                Err(e) => log(&format!("{:?}", e)),
-                _ => ()
-            };
-            count-= ratio*10.0;
-            i+=1;
+            self.ctx.fill_text(&i.to_string(), x_axis_center+15.0, tick_y+3.0); //is there a shorthand for this err handling?
+
         }
 
-        let mut count: f64 = 0.0;
-        let mut i = 0;
-        while count < canvas_width/2.0 {
-            self.ctx.move_to((canvas_width/2.0)+count as f64, canvas_height);
-            self.ctx.line_to((canvas_width/2.0)+count as f64, canvas_height-10.0);
+        for i in 0..x_axis_number_ticks as i32 {
+            let tick_margin = i as f64*(tick_spacing*canvas_to_y_axis_ratio);
+            let tick_x = x_axis_center + tick_margin;
+            let tick_y = canvas_height;
+            self.ctx.move_to(tick_x, tick_y);
+            self.ctx.line_to(tick_x, tick_y-10.0);
             self.ctx.stroke();
-            match self.ctx.fill_text(&i.to_string(), ((canvas_width/2.0)+count as f64)-3 as f64, canvas_height-15 as f64){ //is there a shorthand for this err handling?
-                Err(e) => log(&format!("{:?}", e)),
-                _ => ()
-            };
-            count+= ratio*10.0;
-            i+=1;
+            self.ctx.fill_text(&i.to_string(), (x_axis_center + tick_margin) -3.0, canvas_height-15 as f64);
         }
-        let mut count: f64 = 0.0;
-        let mut i = 1;
-        while count > -canvas_width/2.0 {
-            self.ctx.move_to((canvas_width/2.0)+count as f64, canvas_height);
-            self.ctx.line_to((canvas_width/2.0)+count as f64, canvas_height-10.0);
+
+        for i in (0..x_axis_number_ticks as i32){
+            let tick_margin = i as f64*(tick_spacing*canvas_to_y_axis_ratio);
+            let tick_x = x_axis_center - tick_margin;
+            let tick_y = canvas_height;
+            self.ctx.move_to(tick_x, tick_y);
+            self.ctx.line_to(tick_x, tick_y-10.0);
             self.ctx.stroke();
-            count-= ratio*10.0;
-            match self.ctx.fill_text(&i.to_string(), ((canvas_width/2.0)+count as f64)-3 as f64, canvas_height-15 as f64){ //is there a shorthand for this err handling?
-                Err(e) => log(&format!("{:?}", e)),
-                _ => ()
-            };
-            i+=1;
+            self.ctx.fill_text(&i.to_string(), (x_axis_center - tick_margin) -3.0, canvas_height-15 as f64);
         }
     }
 }

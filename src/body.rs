@@ -68,7 +68,6 @@ impl Body{
     }
 
     fn calculate_spatial_mask(self){
-        // let origin = Point{x: self.distanceX as f64, y: self.distanceY as f64};
         for point in self.transformed_points.iter(){
             
         }

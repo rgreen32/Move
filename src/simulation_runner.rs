@@ -66,8 +66,8 @@ impl SimulationRunner{
             engine: engine, 
             ctx: ctx, 
             window_ratio: canvas.width(), 
-            y_axis_distance: 100, 
-            x_axis_distance: (100 * (canvas.width()/canvas.height())),
+            y_axis_length_meters: 100, 
+            x_axis_length_meters: (100 * (canvas.width()/canvas.height())),
             height_ratio: (canvas.height()/100), 
             width_ratio: (canvas.width()/2/(100 * (canvas.width()/canvas.height()))),
             canvas_width: window_width,
@@ -79,14 +79,14 @@ impl SimulationRunner{
 
     pub fn start(mut self){
         self.renderer.run();
-        let f = Rc::new(RefCell::new(None));
-        let g = f.clone();
-        *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
-            self.renderer.run();
-            request_animation_frame(f.borrow().as_ref().unwrap());
-        }) as Box<dyn FnMut()>));
+        // let f = Rc::new(RefCell::new(None));
+        // let g = f.clone();
+        // *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
+        //     self.renderer.run();
+        //     request_animation_frame(f.borrow().as_ref().unwrap());
+        // }) as Box<dyn FnMut()>));
 
-        request_animation_frame(g.borrow().as_ref().unwrap());
+        // request_animation_frame(g.borrow().as_ref().unwrap());
 
     }
 }
