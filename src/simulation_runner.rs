@@ -3,6 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 use crate::{renderer::Renderer};
 use crate::engine::Engine;
 use crate::body::Body;
+use crate::grid::Grid;
 use core::panic;
 use web_sys::{HtmlCanvasElement, CanvasRenderingContext2d, window};
 use crate::collision::CollisionDetector;
@@ -63,6 +64,7 @@ impl SimulationRunner{
         let renderer = Renderer {
             window: window,
             canvas_id: String::from(canvas_id),
+            grid: Grid::new(10, canvas.width() as f32, canvas.height() as f32),
             engine: engine, 
             ctx: ctx, 
             window_ratio: canvas.width(), 
@@ -79,6 +81,7 @@ impl SimulationRunner{
 
     pub fn start(mut self){
         self.renderer.run();
+
         // let f = Rc::new(RefCell::new(None));
         // let g = f.clone();
         // *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {

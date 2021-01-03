@@ -1,4 +1,4 @@
-use crate::{log, log_num};
+use crate::{grid::{Cell, Grid}, log, log_num};
 use web_sys::{CanvasRenderingContext2d, Window};
 use crate::body::Body;
 use crate::engine::Engine;
@@ -6,6 +6,7 @@ use crate::engine::Engine;
 pub struct Renderer {
     pub window: Window, //Research: what does it mean for a struct to own another struct versus hold a reference?
     pub canvas_id: String,
+    pub grid: Grid,
     pub engine: Engine,
     pub canvas_width: u32, //added width and height fields because HTMLCanvas cant be saved to a field atm.
     pub canvas_height: u32,
@@ -19,11 +20,12 @@ pub struct Renderer {
 
 impl Renderer {
     // #[wasm_bindgen(constructor)] //Why does compiler panic when self param is added here?
-
+    
     pub fn run(&mut self){
         self.engine.run();
         self.ctx.clear_rect(0.0, 0.0, self.canvas_width as f64, self.canvas_height as f64);
         self.draw_axis();
+        self.draw_grid();
         for body in &self.engine.bodies{
             self.draw_shape(&body);
         }
@@ -60,11 +62,39 @@ impl Renderer {
     }
 
 
+    fn draw_grid(&self){
+        for (i, cell) in self.grid.map.iter().enumerate(){
+            if i == 1{
+                log(&format!("cell lower Y position: {:?}", cell.position_y));
+                log(&format!("cell lower Y pixel position: {:?}", self.meters_to_pixels_distance_y(cell.position_y as f64)));
+                self.draw_cell(cell);
+            }
+            /*
+            TODO Figure out why meter_to_pixel_conversion not yielding same results for grid cell and axis ticks.
+                "First tick Y position: 869.4
+                cell lower Y pixel position: 876.0"
+​            */
+        }
+    }
 
-    fn draw_axis(&self){
+    fn draw_cell(&self, cell: &Cell){
+        self.ctx.begin_path();
+        self.ctx.move_to(
+            self.meters_to_pixels_distance_x(cell.position_x as f64), 
+            self.meters_to_pixels_distance_y(cell.position_y as f64)
+        );
+        self.ctx.line_to(
+            self.meters_to_pixels_distance_x((cell.position_x + 10) as f64), 
+            self.meters_to_pixels_distance_y(cell.position_y as f64)
+        );
+        self.ctx.stroke();
+
+    }
+
+    fn draw_axis(&self){ // needs optimization. slowing down rendering
         let canvas_width = self.canvas_width as f64;
         let canvas_height = self.canvas_height as f64;
-        
+
         //draw y axis
         self.ctx.begin_path();
         self.ctx.move_to(canvas_width/2.0, 0.0);
@@ -78,12 +108,17 @@ impl Renderer {
 
         let canvas_to_y_axis_ratio = (canvas_height)/self.y_axis_length_meters as f64;
         let tick_spacing = 10.0;
-        let y_axis_number_of_ticks = canvas_height/(canvas_to_y_axis_ratio*tick_spacing);
+        log(&format!("Canvas ratio: {:?}", (canvas_height)/self.y_axis_length_meters as f64));
+        let y_axis_number_of_ticks = (canvas_height/canvas_to_y_axis_ratio) * tick_spacing;
         let x_axis_number_ticks = (canvas_width/2.0)/tick_spacing;
         let x_axis_center = canvas_width/2.0;
 
         for i in 0..y_axis_number_of_ticks as i32 {
             let tick_margin = i as f64*(tick_spacing*canvas_to_y_axis_ratio);
+            if i ==1{
+                log(&format!("First tick Y position: {:?}", canvas_height - tick_margin));
+            }
+
             let tick_x = x_axis_center;
             let tick_y = canvas_height - tick_margin;
             self.ctx.move_to(tick_x-10.0, tick_y);
