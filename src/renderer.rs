@@ -14,7 +14,7 @@ pub struct Renderer {
     pub window_ratio: u32,
     pub y_axis_length_meters: u32,
     pub x_axis_length_meters: u32,
-    pub height_ratio: u32,
+    pub height_ratio: f64,
     pub width_ratio: u32
 }
 
@@ -109,14 +109,17 @@ impl Renderer {
         let canvas_to_y_axis_ratio = (canvas_height)/self.y_axis_length_meters as f64;
         let tick_spacing = 10.0;
         log(&format!("Canvas ratio: {:?}", (canvas_height)/self.y_axis_length_meters as f64));
-        let y_axis_number_of_ticks = (canvas_height/canvas_to_y_axis_ratio) * tick_spacing;
+        let y_axis_number_of_ticks = canvas_height/(canvas_to_y_axis_ratio* tick_spacing) ;
         let x_axis_number_ticks = (canvas_width/2.0)/tick_spacing;
         let x_axis_center = canvas_width/2.0;
-
+        log(&format!("Canvas height: {:?}", canvas_height));
+        // log(&format!("y_axis_number_of_ticks: {:?}", y_axis_number_of_ticks));
         for i in 0..y_axis_number_of_ticks as i32 {
             let tick_margin = i as f64*(tick_spacing*canvas_to_y_axis_ratio);
             if i ==1{
                 log(&format!("First tick Y position: {:?}", canvas_height - tick_margin));
+                log(&format!("meters_to_pixels function: {:?}", self.meters_to_pixels_distance_y(100.0)));
+                log(&format!("tick_margin: {:?}", tick_margin));
             }
 
             let tick_x = x_axis_center;

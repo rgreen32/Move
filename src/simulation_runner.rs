@@ -70,10 +70,10 @@ impl SimulationRunner{
             window_ratio: canvas.width(), 
             y_axis_length_meters: 100, 
             x_axis_length_meters: (100 * (canvas.width()/canvas.height())),
-            height_ratio: (canvas.height()/100), 
+            height_ratio: (canvas.height() as f64/100.0), 
             width_ratio: (canvas.width()/2/(100 * (canvas.width()/canvas.height()))),
-            canvas_width: window_width,
-            canvas_height: window_height
+            canvas_width: canvas.width(),
+            canvas_height: canvas.height()
         };
 
         return SimulationRunner{renderer: renderer}
