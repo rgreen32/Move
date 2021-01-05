@@ -5,7 +5,7 @@ let entrypoint = JSON.parse(process.env.npm_config_argv)["cooked"].pop()
 const dist = path.resolve(__dirname, "dist");
 
 module.exports = {
-  context: path.resolve(__dirname, `${entrypoint}`),
+  context: path.resolve(__dirname, `./`),
   experiments: {
     asyncWebAssembly: true
   },
@@ -24,7 +24,7 @@ module.exports = {
         use: [{
           loader: 'awesome-typescript-loader',
           options: {
-              configFileName: `./${entrypoint}/tsconfig.json`
+              configFileName: `./tsconfig.json`
           },
       }],
         exclude: /node_modules/
@@ -41,11 +41,11 @@ module.exports = {
     ]
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: "../index.html" }),
+    new HtmlWebpackPlugin({ template: "./index.html" }),
 
     new WasmPackPlugin({
       crateDirectory: __dirname,
-      outDir: `./${entrypoint}/pkg`
+      outDir: `./pkg`
     }),
   ]
 };
