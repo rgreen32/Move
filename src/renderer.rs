@@ -1,4 +1,4 @@
-use crate::{grid::{Cell, Grid}, log, log_num};
+use crate::{body, grid::{Cell, Grid}, log, log_num};
 use web_sys::{CanvasRenderingContext2d, Window};
 use wasm_bindgen::JsValue;
 use crate::body::Body;
@@ -30,11 +30,13 @@ impl Renderer {
         for body in &self.engine.bodies{
             self.draw_shape(&body);
         }
+
     }
 
 
     fn draw_shape(&self, body: &Body){
         let points = &body.transformed_points;
+        // log(&format!("Body: {:?}", body.transformed_points));
         for (i, point_a) in points.iter().enumerate(){
             let point_b = &points[(i + 1) % points.len()];
             self.ctx.begin_path();
@@ -134,7 +136,15 @@ impl Renderer {
     }
 
     fn meters_to_pixels_distance_y(&self, height: f64) -> f64{
-        let distance_in_pixels = self.canvas_height as f64 - (self.canvas_pixels_to_meters_ratio as f64 * height);
+        let distance_in_pixels: f64;
+        if height > 0.0 {
+            distance_in_pixels = (self.canvas_height as f64/2.0) - (self.canvas_pixels_to_meters_ratio as f64 * height);
+        }else if height < 0.0{
+            distance_in_pixels = (self.canvas_height as f64/2.0) - (self.canvas_pixels_to_meters_ratio as f64 * height);
+        }else{
+            distance_in_pixels = self.canvas_height as f64/2.0
+        }
+
         return distance_in_pixels;
     }
 
@@ -143,8 +153,7 @@ impl Renderer {
         if distance > 0.0 {
             distance_in_pixels = (self.canvas_width/2) as f64 + self.canvas_pixels_to_meters_ratio as f64 * distance;
         }else if distance < 0.0 {
-            let distance_from_origin_pixels = -(self.canvas_pixels_to_meters_ratio as f64) * distance;
-            distance_in_pixels = (self.canvas_width/2) as f64 - distance_from_origin_pixels;
+            distance_in_pixels = (self.canvas_width/2) as f64 + self.canvas_pixels_to_meters_ratio as f64 * distance;
         }else{
             distance_in_pixels = (self.canvas_width/2) as f64;
         }
