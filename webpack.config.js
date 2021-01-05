@@ -5,7 +5,7 @@ let entrypoint = JSON.parse(process.env.npm_config_argv)["cooked"].pop()
 const dist = path.resolve(__dirname, "dist");
 
 module.exports = {
-  context: path.resolve(__dirname, `./`),
+  context: path.resolve(__dirname, `example`),
   experiments: {
     asyncWebAssembly: true
   },
@@ -24,7 +24,7 @@ module.exports = {
         use: [{
           loader: 'awesome-typescript-loader',
           options: {
-              configFileName: `./tsconfig.json`
+              configFileName: `./example/tsconfig.json`
           },
       }],
         exclude: /node_modules/
@@ -37,7 +37,7 @@ module.exports = {
   devServer: {
     writeToDisk: true,
     contentBase: [
-        path.resolve(__dirname, `./${entrypoint}`)
+        path.resolve(__dirname, `./example`)
     ]
   },
   plugins: [
@@ -45,7 +45,7 @@ module.exports = {
 
     new WasmPackPlugin({
       crateDirectory: __dirname,
-      outDir: `./pkg`
+      outDir: `./example/pkg`
     }),
   ]
 };
