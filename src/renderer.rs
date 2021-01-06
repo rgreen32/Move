@@ -12,16 +12,27 @@ pub struct Renderer {
     pub canvas_width: u32, //added width and height fields because HTMLCanvas cant be saved to a field atm.
     pub canvas_height: u32,
     pub ctx: CanvasRenderingContext2d,
-    pub window_ratio: u32,
     pub y_axis_length_meters: u32,
-    pub x_axis_length_meters: u32,
     pub canvas_pixels_to_meters_ratio: f64,
-    pub width_ratio: u32
 }
 
 impl Renderer {
     // #[wasm_bindgen(constructor)] //Why does compiler panic when self param is added here?
-    
+    pub fn new(window: Window, canvas_id: String, grid: Grid, engine: Engine,
+         ctx: CanvasRenderingContext2d, canvas_width: u32, canvas_height: u32) -> Renderer{
+        Renderer{
+            window,
+            canvas_id,
+            grid,
+            engine,
+            ctx,
+            canvas_width,
+            canvas_height,
+            y_axis_length_meters: 100,
+            canvas_pixels_to_meters_ratio: (canvas_height as f64)/100.0 // Its important canvas height is converted to float before being divided. otherwise the resulting number gets truncated and becomes in accurate.
+        }
+    }
+
     pub fn run(&mut self){
         self.engine.run();
         self.ctx.clear_rect(0.0, 0.0, self.canvas_width as f64, self.canvas_height as f64);
@@ -30,7 +41,7 @@ impl Renderer {
         for body in &self.engine.bodies{
             self.draw_shape(&body);
         }
-        self.draw_cell( &Cell{ id: (Quadrant::Quadrant2, -60, 40), position_x: -160, position_y: 0, center_x: -55, center_y: 45 }, 10)
+        // self.draw_cell( &Cell{ id: (Quadrant::Quadrant2, -60, 40), position_x: -60, position_y: 0, center_x: -55, center_y: 45 }, 10)
 
     }
 

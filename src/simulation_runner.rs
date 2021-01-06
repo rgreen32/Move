@@ -18,7 +18,8 @@ fn request_animation_frame(f: &Closure<dyn FnMut()>) {
 
 #[wasm_bindgen]
 pub struct SimulationRunner {
-    renderer: Renderer
+    renderer: Renderer /*I want to store the Engine and Grid structs here (even by reference maybe) 
+                        but wasm_bindgen limitations at the moment wont allow for it. -1/6/2021 */ 
 }
 
 #[wasm_bindgen]
@@ -59,22 +60,12 @@ impl SimulationRunner{
             return x;
         }).collect::<Vec<Body>>();
 
+        
         let engine = Engine {time_delta_root: js_sys::Date::now(), bodies: updated_bodies, collision_detector: CollisionDetector{}};
 
-        let renderer = Renderer {
-            window: window,
-            canvas_id: String::from(canvas_id),
-            grid: Grid::new(10, canvas.width() as f32, canvas.height() as f32),
-            engine: engine, 
-            ctx: ctx, 
-            window_ratio: canvas.width(), 
-            y_axis_length_meters: 100, 
-            x_axis_length_meters: (100 * (canvas.width()/canvas.height())),
-            canvas_pixels_to_meters_ratio: (canvas.height() as f64/100.0), 
-            width_ratio: (canvas.width()/2/(100 * (canvas.width()/canvas.height()))),
-            canvas_width: canvas.width(),
-            canvas_height: canvas.height()
-        };
+        let grid = Grid::new(10, canvas.width() as f32, canvas.height() as f32);
+        
+        let renderer = Renderer::new(window, String::from(canvas_id), grid, engine, ctx, canvas.width(), canvas.height());
 
         return SimulationRunner{renderer: renderer}
     }
