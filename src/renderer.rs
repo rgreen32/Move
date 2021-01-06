@@ -1,4 +1,4 @@
-use crate::{body, grid::{Cell, Grid}, log, log_num};
+use crate::{body, grid::{Cell, Grid, Quadrant}, log, log_num};
 use web_sys::{CanvasRenderingContext2d, Window};
 use wasm_bindgen::JsValue;
 use crate::body::Body;
@@ -30,6 +30,7 @@ impl Renderer {
         for body in &self.engine.bodies{
             self.draw_shape(&body);
         }
+        self.draw_cell( &Cell{ id: (Quadrant::Quadrant2, -60, 40), position_x: -160, position_y: 0, center_x: -55, center_y: 45 }, 10)
 
     }
 
@@ -48,40 +49,70 @@ impl Renderer {
 
     fn draw_grid(&self){
         self.ctx.set_stroke_style(&JsValue::from_str("lightgray"));
-        for column in self.grid.map.iter(){
-            for cell in column.iter(){
-                self.draw_cell(cell, self.grid.cell_side_length_meters as i32);
-                
-            }
+        for (quadrant, cells)  in self.grid.map.iter(){
+            self.draw_quadrant_cells(cells);
         }
         self.ctx.set_stroke_style(&JsValue::from_str("Black"));
     }
 
+    fn draw_quadrant_cells(&self, quadrant_cells: &Vec<Vec<Cell>>){
+        for column in quadrant_cells.iter(){
+            for cell in column.iter(){
+                self.draw_cell(cell, self.grid.cell_side_length_meters as i32);
+            }
+        }
+    }
+
     fn draw_cell(&self, cell: &Cell, cell_side_length: i32){
         self.ctx.begin_path();
-        self.ctx.move_to(
-            self.meters_to_pixels_distance_x(cell.position_x as f64), 
-            self.meters_to_pixels_distance_y(cell.position_y as f64)
-        );
-
-        self.ctx.line_to(
-            self.meters_to_pixels_distance_x((cell.position_x + cell_side_length) as f64), 
-            self.meters_to_pixels_distance_y(cell.position_y as f64)
-        );
-        self.ctx.line_to(
-            self.meters_to_pixels_distance_x((cell.position_x + cell_side_length) as f64), 
-            self.meters_to_pixels_distance_y((cell.position_y + cell_side_length) as f64)
-        );
-        self.ctx.line_to(
-            self.meters_to_pixels_distance_x(cell.position_x as f64), 
-            self.meters_to_pixels_distance_y((cell.position_y + cell_side_length) as f64)
-        );
-        self.ctx.line_to(
-            self.meters_to_pixels_distance_x(cell.position_x as f64), 
-            self.meters_to_pixels_distance_y(cell.position_y as f64)
-        );
-        self.ctx.stroke();
-
+        //need to draw cells with different paths based on quadrant. (Or draw from center coords?)
+        if cell.id.0 == Quadrant::Quadrant1 {
+            self.ctx.move_to(
+                self.meters_to_pixels_distance_x(cell.position_x as f64), 
+                self.meters_to_pixels_distance_y(cell.position_y as f64)
+            );
+    
+            self.ctx.line_to(
+                self.meters_to_pixels_distance_x((cell.position_x + cell_side_length) as f64), 
+                self.meters_to_pixels_distance_y(cell.position_y as f64)
+            );
+            self.ctx.line_to(
+                self.meters_to_pixels_distance_x((cell.position_x + cell_side_length) as f64), 
+                self.meters_to_pixels_distance_y((cell.position_y + cell_side_length) as f64)
+            );
+            self.ctx.line_to(
+                self.meters_to_pixels_distance_x(cell.position_x as f64), 
+                self.meters_to_pixels_distance_y((cell.position_y + cell_side_length) as f64)
+            );
+            self.ctx.line_to(
+                self.meters_to_pixels_distance_x(cell.position_x as f64), 
+                self.meters_to_pixels_distance_y(cell.position_y as f64)
+            );
+            self.ctx.stroke();
+        }else if cell.id.0 == Quadrant::Quadrant2{
+            self.ctx.move_to(
+                self.meters_to_pixels_distance_x(cell.position_x as f64), 
+                self.meters_to_pixels_distance_y(cell.position_y as f64)
+            );
+    
+            self.ctx.line_to(
+                self.meters_to_pixels_distance_x((cell.position_x - cell_side_length) as f64), 
+                self.meters_to_pixels_distance_y(cell.position_y as f64)
+            );
+            self.ctx.line_to(
+                self.meters_to_pixels_distance_x((cell.position_x - cell_side_length) as f64), 
+                self.meters_to_pixels_distance_y((cell.position_y + cell_side_length) as f64)
+            );
+            self.ctx.line_to(
+                self.meters_to_pixels_distance_x(cell.position_x as f64), 
+                self.meters_to_pixels_distance_y((cell.position_y + cell_side_length) as f64)
+            );
+            self.ctx.line_to(
+                self.meters_to_pixels_distance_x(cell.position_x as f64), 
+                self.meters_to_pixels_distance_y(cell.position_y as f64)
+            );
+            self.ctx.stroke();
+        }
     }
 
     fn draw_axis(&self){ // needs optimization. slowing down rendering
