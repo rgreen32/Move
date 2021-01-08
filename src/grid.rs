@@ -19,87 +19,74 @@ impl Grid{
             canvas_width,
             canvas_height,
             canvas_pixels_to_meters_ratio: canvas_height/100 as f32,
-
-            // will have to assign empty 2d vector and generate map later if i want to move meter_to_pixel functions to Grid
-            map: Grid::generate_map(canvas_width, canvas_height, cell_side_length_meters)
+            map: HashMap::new()
         }
     }
-    fn generate_map(canvas_width: f32, canvas_height: f32, cell_side_length_meters: u32) -> HashMap<Quadrant, Vec<Vec<Cell>>>  {
-        let canvas_pixels_to_meters_ratio = canvas_height/100 as f32;
-        let number_of_cells_y_axis = (canvas_height/2.0)/(canvas_pixels_to_meters_ratio*cell_side_length_meters as f32);
-        let number_of_cells_x_axis = ((canvas_width/2.0)/(canvas_pixels_to_meters_ratio*cell_side_length_meters as f32)) + 1.0; //appending extra cell in case there is space left between last column and edge of screen 
-        let cell_margin = (cell_side_length_meters/2) as i32;
-        // log(&format!("Number of cells x_axis: {:?}", number_of_cells_x_axis));
+    pub fn initialize_grid(&mut self){
+        let number_of_cells_y_axis = (self.canvas_height/2.0)/(self.canvas_pixels_to_meters_ratio*self.cell_side_length_meters as f32);
+        let number_of_cells_x_axis = ((self.canvas_width/2.0)/(self.canvas_pixels_to_meters_ratio*self.cell_side_length_meters as f32)) + 1.0; //appending extra cell in case there is space left between last column and edge of screen 
+        
+        //Generate cells for quadrant1
         let mut quadrant1: Vec<Vec<Cell>> = Vec::with_capacity((number_of_cells_x_axis*number_of_cells_y_axis) as usize);
         for x in 0..number_of_cells_x_axis as usize{
-            // log("quad 1 push");
             quadrant1.push(Vec::new());
             for y in 0..number_of_cells_y_axis as usize{
-                let position_x = x as i32*cell_side_length_meters as i32;
-                let position_y = y as i32*cell_side_length_meters as i32;
-
-                //pre-calculate coords for the top-left corner of cell to make drawing more efficient. 
-                let strokerect_x = x as i32*cell_side_length_meters as i32;
-                let strokerect_y = y as i32*cell_side_length_meters as i32 + cell_side_length_meters as i32;
+                let position_x = x as i32*self.cell_side_length_meters as i32;
+                let position_y = y as i32*self.cell_side_length_meters as i32;
+                let strokerect_x = self.meters_to_pixels_distance_x((x as i32*self.cell_side_length_meters as i32) as f64);
+                let strokerect_y = self.meters_to_pixels_distance_y((y as i32*self.cell_side_length_meters as i32 + self.cell_side_length_meters as i32) as f64);
                 
                 quadrant1[x].push(Cell{id: (Quadrant::Quadrant1, position_x, position_y), position_x, position_y, strokerect_x, strokerect_y});
             }
         }
 
-
+        //Generate cells for quadrant2
         let mut quadrant2: Vec<Vec<Cell>> = Vec::with_capacity((number_of_cells_x_axis*number_of_cells_y_axis) as usize);
         for x in 0..number_of_cells_x_axis as usize{
-            // log("quad 2 push");
             quadrant2.push(Vec::new());
             for y in 0..number_of_cells_y_axis as usize{
-                let position_x = -(x as i32)*cell_side_length_meters as i32;
-                let position_y = y as i32*cell_side_length_meters as i32;
-
-                let strokerect_x = -(x as i32)*cell_side_length_meters as i32 - cell_side_length_meters as i32;
-                let strokerect_y = y as i32*cell_side_length_meters as i32 + cell_side_length_meters as i32;
+                let position_x = -(x as i32)*self.cell_side_length_meters as i32;
+                let position_y = y as i32*self.cell_side_length_meters as i32;
+                let strokerect_x = self.meters_to_pixels_distance_x((-(x as i32)*self.cell_side_length_meters as i32 - self.cell_side_length_meters as i32) as f64);
+                let strokerect_y = self.meters_to_pixels_distance_y((y as i32*self.cell_side_length_meters as i32 + self.cell_side_length_meters as i32) as f64);
 
                 quadrant2[x].push(Cell{id: (Quadrant::Quadrant2, position_x, position_y), position_x, position_y, strokerect_x, strokerect_y});
             }
         }
 
-
+        //Generate cells for quadrant3
         let mut quadrant3: Vec<Vec<Cell>> = Vec::with_capacity((number_of_cells_x_axis*number_of_cells_y_axis) as usize);
         for x in 0..number_of_cells_x_axis as usize{
-            // log("quad 2 push");
             quadrant3.push(Vec::new());
             for y in 0..number_of_cells_y_axis as usize{
-                let position_x = -(x as i32)*cell_side_length_meters as i32;
-                let position_y = -(y as i32)*cell_side_length_meters as i32;
-
-                let strokerect_x = -(x as i32)*cell_side_length_meters as i32 - cell_side_length_meters as i32;
-                let strokerect_y = -(y as i32)*cell_side_length_meters as i32;
+                let position_x = -(x as i32)*self.cell_side_length_meters as i32;
+                let position_y = -(y as i32)*self.cell_side_length_meters as i32;
+                let strokerect_x = self.meters_to_pixels_distance_x((-(x as i32)*self.cell_side_length_meters as i32 - self.cell_side_length_meters as i32) as f64);
+                let strokerect_y = self.meters_to_pixels_distance_y((-(y as i32)*self.cell_side_length_meters as i32) as f64);
 
                 quadrant3[x].push(Cell{id: (Quadrant::Quadrant3, position_x, position_y), position_x, position_y, strokerect_x, strokerect_y});
             }
         }
 
-
+        //Generate cells for quadrant4
         let mut quadrant4: Vec<Vec<Cell>> = Vec::with_capacity((number_of_cells_x_axis*number_of_cells_y_axis) as usize);
         for x in 0..number_of_cells_x_axis as usize{
-            // log("quad 2 push");
             quadrant4.push(Vec::new());
             for y in 0..number_of_cells_y_axis as usize{
-                let position_x = x as i32*cell_side_length_meters as i32;
-                let position_y = -(y as i32)*cell_side_length_meters as i32;
-
-                let strokerect_x = x as i32*cell_side_length_meters as i32;
-                let strokerect_y = -(y as i32)*cell_side_length_meters as i32;
+                let position_x = x as i32*self.cell_side_length_meters as i32;
+                let position_y = -(y as i32)*self.cell_side_length_meters as i32;
+                let strokerect_x = self.meters_to_pixels_distance_x((x as i32*self.cell_side_length_meters as i32) as f64);
+                let strokerect_y = self.meters_to_pixels_distance_y((-(y as i32)*self.cell_side_length_meters as i32) as f64);
 
                 quadrant4[x].push(Cell{id: (Quadrant::Quadrant4, position_x, position_y), position_x, position_y, strokerect_x, strokerect_y});
             }
         }
             
-        let mut map: HashMap<Quadrant, Vec<Vec<Cell>>> = HashMap::new(); // add quadrants to map
-        map.insert(Quadrant::Quadrant1, quadrant1);
-        map.insert(Quadrant::Quadrant2, quadrant2);
-        map.insert(Quadrant::Quadrant3, quadrant3);
-        map.insert(Quadrant::Quadrant4, quadrant4);
-        return map;
+        // let mut map: HashMap<Quadrant, Vec<Vec<Cell>>> = HashMap::new(); // add quadrants to map
+        self.map.insert(Quadrant::Quadrant1, quadrant1);
+        self.map.insert(Quadrant::Quadrant2, quadrant2);
+        self.map.insert(Quadrant::Quadrant3, quadrant3);
+        self.map.insert(Quadrant::Quadrant4, quadrant4);
     }
 
     pub fn generate_spatial_mask(body: &Body){
@@ -144,6 +131,6 @@ pub struct Cell{
     pub id: (Quadrant, i32, i32), //what data type should this be?
     pub position_x: i32,
     pub position_y: i32,
-    pub strokerect_x: i32,
-    pub strokerect_y: i32
+    pub strokerect_x: f64,
+    pub strokerect_y: f64
 }

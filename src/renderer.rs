@@ -79,8 +79,8 @@ impl Renderer {
         
         self.ctx.begin_path();
         self.ctx.stroke_rect(
-            self.meters_to_pixels_distance_x(cell.strokerect_x as f64), 
-            self.meters_to_pixels_distance_y(cell.strokerect_y as f64), 
+            cell.strokerect_x as f64, 
+            cell.strokerect_y as f64, 
             cell_side_length_pixels, 
             cell_side_length_pixels);
     }
