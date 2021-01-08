@@ -6,9 +6,6 @@ pub struct Grid{
     pub canvas_width: f32, //added width and height fields because HTMLCanvas cant be saved to a field atm.
     pub canvas_height: f32,
     canvas_pixels_to_meters_ratio: f32,
-    // meter_to_pixel_ratio: u32,
-    // pub y_axis_distance: u32,
-    // pub x_axis_distance: u32,
     pub map: HashMap<Quadrant, Vec<Vec<Cell>>>
 }
 
@@ -93,7 +90,7 @@ impl Grid{
         
     }
 
-    fn meters_to_pixels_distance_x(&self, distance: f64) -> f64{
+    pub fn meters_to_pixels_distance_x(&self, distance: f64) -> f64{
         let distance_in_pixels: f64;
         if distance > 0.0 {
             distance_in_pixels = (self.canvas_width/2.0) as f64 + self.canvas_pixels_to_meters_ratio as f64 * distance;
@@ -105,7 +102,7 @@ impl Grid{
         return distance_in_pixels; 
     }
 
-    fn meters_to_pixels_distance_y(&self, height: f64) -> f64{
+    pub fn meters_to_pixels_distance_y(&self, height: f64) -> f64{
         let distance_in_pixels: f64;
         if height > 0.0 {
             distance_in_pixels = (self.canvas_height as f64/2.0) - (self.canvas_pixels_to_meters_ratio as f64 * height);

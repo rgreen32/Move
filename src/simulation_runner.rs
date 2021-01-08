@@ -65,6 +65,7 @@ impl SimulationRunner{
 
         let mut grid = Grid::new(10, canvas.width() as f32, canvas.height() as f32);
         grid.initialize_grid();
+        
         let renderer = Renderer::new(window, String::from(canvas_id), grid, engine, ctx, canvas.width(), canvas.height());
 
         return SimulationRunner{renderer: renderer}

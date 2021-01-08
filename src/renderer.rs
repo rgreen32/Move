@@ -42,18 +42,15 @@ impl Renderer {
             self.draw_shape(&body);
         }
         // self.draw_cell( &Cell { id: (Quadrant::Quadrant1, 0, 0), position_x: 0, position_y: 0, strokerect_x: 0, strokerect_y: 5 }, 10)
-
     }
-
 
     fn draw_shape(&self, body: &Body){
         let points = &body.transformed_points;
-        // log(&format!("Body: {:?}", body.transformed_points));
         for (i, point_a) in points.iter().enumerate(){
             let point_b = &points[(i + 1) % points.len()];
             self.ctx.begin_path();
-            self.ctx.move_to(self.meters_to_pixels_distance_x(point_a.x), self.meters_to_pixels_distance_y(point_a.y));
-            self.ctx.line_to(self.meters_to_pixels_distance_x(point_b.x), self.meters_to_pixels_distance_y(point_b.y));
+            self.ctx.move_to(self.grid.meters_to_pixels_distance_x(point_a.x), self.grid.meters_to_pixels_distance_y(point_a.y));
+            self.ctx.line_to(self.grid.meters_to_pixels_distance_x(point_b.x), self.grid.meters_to_pixels_distance_y(point_b.y));
             self.ctx.stroke();
         }
     }
@@ -134,31 +131,6 @@ impl Renderer {
             self.ctx.stroke();
             self.ctx.fill_text(&i.to_string(), (x_axis_center - tick_margin) -3.0, canvas_height-15 as f64);
         }
-    }
-
-    fn meters_to_pixels_distance_y(&self, height: f64) -> f64{
-        let distance_in_pixels: f64;
-        if height > 0.0 {
-            distance_in_pixels = (self.canvas_height as f64/2.0) - (self.canvas_pixels_to_meters_ratio as f64 * height);
-        }else if height < 0.0{
-            distance_in_pixels = (self.canvas_height as f64/2.0) - (self.canvas_pixels_to_meters_ratio as f64 * height);
-        }else{
-            distance_in_pixels = self.canvas_height as f64/2.0
-        }
-
-        return distance_in_pixels;
-    }
-
-    fn meters_to_pixels_distance_x(&self, distance: f64) -> f64{
-        let distance_in_pixels: f64;
-        if distance > 0.0 {
-            distance_in_pixels = (self.canvas_width/2) as f64 + self.canvas_pixels_to_meters_ratio as f64 * distance;
-        }else if distance < 0.0 {
-            distance_in_pixels = (self.canvas_width/2) as f64 + self.canvas_pixels_to_meters_ratio as f64 * distance;
-        }else{
-            distance_in_pixels = (self.canvas_width/2) as f64;
-        }
-        return distance_in_pixels; 
     }
 
 }
