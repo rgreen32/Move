@@ -41,7 +41,7 @@ impl Renderer {
         for body in &self.engine.bodies{
             self.draw_shape(&body);
         }
-        // self.draw_cell( &Cell{ id: (Quadrant::Quadrant2, -60, 40), position_x: -60, position_y: 0, center_x: -55, center_y: 45 }, 10)
+        // self.draw_cell( &Cell { id: (Quadrant::Quadrant1, 0, 0), position_x: 0, position_y: 0, strokerect_x: 0, strokerect_y: 5 }, 10)
 
     }
 
@@ -75,55 +75,14 @@ impl Renderer {
     }
 
     fn draw_cell(&self, cell: &Cell, cell_side_length: i32){
+        let cell_side_length_pixels = self.canvas_pixels_to_meters_ratio * cell_side_length as f64;
+        
         self.ctx.begin_path();
-        //need to draw cells with different paths based on quadrant. (Or draw from center coords?)
-        if cell.id.0 == Quadrant::Quadrant1 {
-            self.ctx.move_to(
-                self.meters_to_pixels_distance_x(cell.position_x as f64), 
-                self.meters_to_pixels_distance_y(cell.position_y as f64)
-            );
-    
-            self.ctx.line_to(
-                self.meters_to_pixels_distance_x((cell.position_x + cell_side_length) as f64), 
-                self.meters_to_pixels_distance_y(cell.position_y as f64)
-            );
-            self.ctx.line_to(
-                self.meters_to_pixels_distance_x((cell.position_x + cell_side_length) as f64), 
-                self.meters_to_pixels_distance_y((cell.position_y + cell_side_length) as f64)
-            );
-            self.ctx.line_to(
-                self.meters_to_pixels_distance_x(cell.position_x as f64), 
-                self.meters_to_pixels_distance_y((cell.position_y + cell_side_length) as f64)
-            );
-            self.ctx.line_to(
-                self.meters_to_pixels_distance_x(cell.position_x as f64), 
-                self.meters_to_pixels_distance_y(cell.position_y as f64)
-            );
-            self.ctx.stroke();
-        }else if cell.id.0 == Quadrant::Quadrant2{
-            self.ctx.move_to(
-                self.meters_to_pixels_distance_x(cell.position_x as f64), 
-                self.meters_to_pixels_distance_y(cell.position_y as f64)
-            );
-    
-            self.ctx.line_to(
-                self.meters_to_pixels_distance_x((cell.position_x - cell_side_length) as f64), 
-                self.meters_to_pixels_distance_y(cell.position_y as f64)
-            );
-            self.ctx.line_to(
-                self.meters_to_pixels_distance_x((cell.position_x - cell_side_length) as f64), 
-                self.meters_to_pixels_distance_y((cell.position_y + cell_side_length) as f64)
-            );
-            self.ctx.line_to(
-                self.meters_to_pixels_distance_x(cell.position_x as f64), 
-                self.meters_to_pixels_distance_y((cell.position_y + cell_side_length) as f64)
-            );
-            self.ctx.line_to(
-                self.meters_to_pixels_distance_x(cell.position_x as f64), 
-                self.meters_to_pixels_distance_y(cell.position_y as f64)
-            );
-            self.ctx.stroke();
-        }
+        self.ctx.stroke_rect(
+            self.meters_to_pixels_distance_x(cell.strokerect_x as f64), 
+            self.meters_to_pixels_distance_y(cell.strokerect_y as f64), 
+            cell_side_length_pixels, 
+            cell_side_length_pixels);
     }
 
     fn draw_axis(&self){ // needs optimization. slowing down rendering

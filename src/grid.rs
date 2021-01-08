@@ -5,6 +5,7 @@ pub struct Grid{
     pub cell_side_length_meters: u32,
     pub canvas_width: f32, //added width and height fields because HTMLCanvas cant be saved to a field atm.
     pub canvas_height: f32,
+    canvas_pixels_to_meters_ratio: f32,
     // meter_to_pixel_ratio: u32,
     // pub y_axis_distance: u32,
     // pub x_axis_distance: u32,
@@ -17,9 +18,9 @@ impl Grid{
             cell_side_length_meters,
             canvas_width,
             canvas_height,
-            // meter_to_pixel_ratio: (canvas_width*canvas_height) /(cell_side_length_meters*cell_side_length_meters),
-            // y_axis_distance,
-            // x_axis_distance,
+            canvas_pixels_to_meters_ratio: canvas_height/100 as f32,
+
+            // will have to assign empty 2d vector and generate map later if i want to move meter_to_pixel functions to Grid
             map: Grid::generate_map(canvas_width, canvas_height, cell_side_length_meters)
         }
     }
@@ -36,11 +37,15 @@ impl Grid{
             for y in 0..number_of_cells_y_axis as usize{
                 let position_x = x as i32*cell_side_length_meters as i32;
                 let position_y = y as i32*cell_side_length_meters as i32;
-                let center_x = x as i32*cell_side_length_meters as i32 + cell_margin;
-                let center_y = y as i32*cell_side_length_meters as i32 + cell_margin;
-                quadrant1[x].push(Cell{id: (Quadrant::Quadrant1, position_x, position_y), position_x, position_y, center_x, center_y});
+
+                //pre-calculate coords for the top-left corner of cell to make drawing more efficient. 
+                let strokerect_x = x as i32*cell_side_length_meters as i32;
+                let strokerect_y = y as i32*cell_side_length_meters as i32 + cell_side_length_meters as i32;
+                
+                quadrant1[x].push(Cell{id: (Quadrant::Quadrant1, position_x, position_y), position_x, position_y, strokerect_x, strokerect_y});
             }
         }
+
 
         let mut quadrant2: Vec<Vec<Cell>> = Vec::with_capacity((number_of_cells_x_axis*number_of_cells_y_axis) as usize);
         for x in 0..number_of_cells_x_axis as usize{
@@ -49,27 +54,81 @@ impl Grid{
             for y in 0..number_of_cells_y_axis as usize{
                 let position_x = -(x as i32)*cell_side_length_meters as i32;
                 let position_y = y as i32*cell_side_length_meters as i32;
-                let center_x = -(x as i32)*cell_side_length_meters as i32 + cell_margin;
-                let center_y = y as i32*cell_side_length_meters as i32 + cell_margin;
-                quadrant2[x].push(Cell{id: (Quadrant::Quadrant2, position_x, position_y), position_x, position_y, center_x, center_y});
+
+                let strokerect_x = -(x as i32)*cell_side_length_meters as i32 - cell_side_length_meters as i32;
+                let strokerect_y = y as i32*cell_side_length_meters as i32 + cell_side_length_meters as i32;
+
+                quadrant2[x].push(Cell{id: (Quadrant::Quadrant2, position_x, position_y), position_x, position_y, strokerect_x, strokerect_y});
             }
-            
         }
-        // quadrant2's first column is being placed over quadrant1's first column
-        // log(&format!("quadrant 1: {:?}", quadrant1.len()));
-        // log(&format!("quadrant 1 first column: {:?}", quadrant1[0]));
-        // log(&format!("quadrant 1 last column: {:?}", quadrant1[16]));
-        // log(&format!("quadrant 2: {:?}", quadrant2.len()));
-        // log(&format!("quadrant 2 first column: {:?}", quadrant2[0]));
-        // log(&format!("quadrant 2 last column: {:?}", quadrant2[16]));
+
+
+        let mut quadrant3: Vec<Vec<Cell>> = Vec::with_capacity((number_of_cells_x_axis*number_of_cells_y_axis) as usize);
+        for x in 0..number_of_cells_x_axis as usize{
+            // log("quad 2 push");
+            quadrant3.push(Vec::new());
+            for y in 0..number_of_cells_y_axis as usize{
+                let position_x = -(x as i32)*cell_side_length_meters as i32;
+                let position_y = -(y as i32)*cell_side_length_meters as i32;
+
+                let strokerect_x = -(x as i32)*cell_side_length_meters as i32 - cell_side_length_meters as i32;
+                let strokerect_y = -(y as i32)*cell_side_length_meters as i32;
+
+                quadrant3[x].push(Cell{id: (Quadrant::Quadrant3, position_x, position_y), position_x, position_y, strokerect_x, strokerect_y});
+            }
+        }
+
+
+        let mut quadrant4: Vec<Vec<Cell>> = Vec::with_capacity((number_of_cells_x_axis*number_of_cells_y_axis) as usize);
+        for x in 0..number_of_cells_x_axis as usize{
+            // log("quad 2 push");
+            quadrant4.push(Vec::new());
+            for y in 0..number_of_cells_y_axis as usize{
+                let position_x = x as i32*cell_side_length_meters as i32;
+                let position_y = -(y as i32)*cell_side_length_meters as i32;
+
+                let strokerect_x = x as i32*cell_side_length_meters as i32;
+                let strokerect_y = -(y as i32)*cell_side_length_meters as i32;
+
+                quadrant4[x].push(Cell{id: (Quadrant::Quadrant4, position_x, position_y), position_x, position_y, strokerect_x, strokerect_y});
+            }
+        }
+            
         let mut map: HashMap<Quadrant, Vec<Vec<Cell>>> = HashMap::new(); // add quadrants to map
         map.insert(Quadrant::Quadrant1, quadrant1);
         map.insert(Quadrant::Quadrant2, quadrant2);
+        map.insert(Quadrant::Quadrant3, quadrant3);
+        map.insert(Quadrant::Quadrant4, quadrant4);
         return map;
     }
 
     pub fn generate_spatial_mask(body: &Body){
         
+    }
+
+    fn meters_to_pixels_distance_x(&self, distance: f64) -> f64{
+        let distance_in_pixels: f64;
+        if distance > 0.0 {
+            distance_in_pixels = (self.canvas_width/2.0) as f64 + self.canvas_pixels_to_meters_ratio as f64 * distance;
+        }else if distance < 0.0 {
+            distance_in_pixels = (self.canvas_width/2.0) as f64 + self.canvas_pixels_to_meters_ratio as f64 * distance;
+        }else{
+            distance_in_pixels = (self.canvas_width/2.0) as f64;
+        }
+        return distance_in_pixels; 
+    }
+
+    fn meters_to_pixels_distance_y(&self, height: f64) -> f64{
+        let distance_in_pixels: f64;
+        if height > 0.0 {
+            distance_in_pixels = (self.canvas_height as f64/2.0) - (self.canvas_pixels_to_meters_ratio as f64 * height);
+        }else if height < 0.0{
+            distance_in_pixels = (self.canvas_height as f64/2.0) - (self.canvas_pixels_to_meters_ratio as f64 * height);
+        }else{
+            distance_in_pixels = self.canvas_height as f64/2.0
+        }
+
+        return distance_in_pixels;
     }
 }
 #[derive(Hash, Eq, PartialEq, Debug)]
@@ -85,6 +144,6 @@ pub struct Cell{
     pub id: (Quadrant, i32, i32), //what data type should this be?
     pub position_x: i32,
     pub position_y: i32,
-    pub center_x: i32,
-    pub center_y: i32
+    pub strokerect_x: i32,
+    pub strokerect_y: i32
 }
