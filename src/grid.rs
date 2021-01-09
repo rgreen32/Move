@@ -7,8 +7,8 @@ pub struct Grid{
     pub canvas_height: f32,
     pub canvas_pixels_to_meters_ratio: f64,
     pub map: HashMap<Quadrant, Vec<Vec<Cell>>>,
-    pub x_axis_ticks: Vec<f64>,
-    pub y_axis_ticks: Vec<f64>
+    pub x_axis_ticks: Vec<(f64 ,f64)>,
+    pub y_axis_ticks: Vec<(f64 ,f64)>
 }
 
 impl Grid{
@@ -31,15 +31,20 @@ impl Grid{
         for x in 0..number_of_cells_x_axis as usize{
             let positive_x_tick = x as i32*self.cell_side_length_meters as i32;
             let negative_x_tick = -(x as i32)*self.cell_side_length_meters as i32;
-            self.x_axis_ticks.push(self.meters_to_pixels_distance_x(positive_x_tick as f64));
-            self.x_axis_ticks.push(self.meters_to_pixels_distance_x(negative_x_tick as f64));
+            let positive_x_tick_pixel_position = self.meters_to_pixels_distance_x(positive_x_tick as f64);
+            let negative_x_tick_pixel_position = self.meters_to_pixels_distance_x(negative_x_tick as f64);
+            
+            self.x_axis_ticks.push((positive_x_tick_pixel_position, negative_x_tick_pixel_position))
         }
 
         for y in 0..number_of_cells_y_axis as usize{
             let positive_y_tick = y as i32*self.cell_side_length_meters as i32;
             let negative_y_tick = -(y as i32)*self.cell_side_length_meters as i32;
-            self.y_axis_ticks.push(self.meters_to_pixels_distance_y(positive_y_tick as f64));
-            self.y_axis_ticks.push(self.meters_to_pixels_distance_y(negative_y_tick as f64));
+            let positive_y_tick_pixel_position = self.meters_to_pixels_distance_y(positive_y_tick as f64);
+            let negative_y_tick_pixel_position = self.meters_to_pixels_distance_y(negative_y_tick as f64);
+            
+            self.y_axis_ticks.push((positive_y_tick_pixel_position, negative_y_tick_pixel_position))
+
         }
 
         //Generate cells for quadrant1

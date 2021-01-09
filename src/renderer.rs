@@ -82,10 +82,9 @@ impl Renderer {
     }
 
     fn draw_axis(&mut self){ // needs optimization. slowing down rendering
-        // self.ctx.set_stroke_style(&JsValue::from_str("Black"));
         let canvas_width = self.grid.canvas_width as f64;
         let canvas_height = self.grid.canvas_height as f64;
-        //TODO: Draw axis from grid
+
         let x_axis_center = canvas_width/2.0;
         let y_axis_center = canvas_height/2.0;
         
@@ -105,22 +104,40 @@ impl Renderer {
         self.ctx.stroke();
         self.ctx.close_path();
 
-        self.ctx.set_stroke_style(&JsValue::from_str("Red"));
-        for (i, tick) in self.grid.x_axis_ticks.iter().enumerate(){
+        // self.ctx.set_stroke_style(&JsValue::from_str("Red"));
+        self.ctx.set_font("12px Arial");
+        for (i, (positive_tick, negative_tick)) in self.grid.x_axis_ticks.iter().enumerate(){
+            if i == 0 { continue; }
             self.ctx.begin_path();
-            self.ctx.move_to(*tick, y_axis_center+10.0);
-            self.ctx.line_to(*tick, y_axis_center-10.0);
+
+            self.ctx.move_to(*positive_tick, y_axis_center+10.0);
+            self.ctx.line_to(*positive_tick, y_axis_center-10.0);
+            self.ctx.fill_text(&i.to_string(), *positive_tick-4.0, y_axis_center+22.0);
             self.ctx.stroke();
+            
+            self.ctx.move_to(*negative_tick, y_axis_center+10.0);
+            self.ctx.line_to(*negative_tick, y_axis_center-10.0);
+            self.ctx.fill_text(&i.to_string(), *negative_tick-4.0, y_axis_center+22.0);
+            self.ctx.stroke();
+            
             self.ctx.close_path();
-            // self.ctx.fill_text(&i.to_string(), *tick-3.0, y_axis_center+10.0); // When ticks get passed as tuples they will share this method. for now it doesnt makes sense
+
         }
-        for (i, tick) in self.grid.y_axis_ticks.iter().enumerate(){
+        for (i, (positive_tick, negative_tick))  in self.grid.y_axis_ticks.iter().enumerate(){
+            if i == 0 { continue; }
             self.ctx.begin_path();
-            self.ctx.move_to(x_axis_center+10.0 ,*tick);
-            self.ctx.line_to(x_axis_center-10.0, *tick);
+
+            self.ctx.move_to(x_axis_center+10.0, *positive_tick);
+            self.ctx.line_to(x_axis_center-10.0, *positive_tick);
+            self.ctx.fill_text(&i.to_string(), x_axis_center+12.0, *positive_tick+4.0);
             self.ctx.stroke();
+            
+            self.ctx.move_to(x_axis_center+10.0, *negative_tick);
+            self.ctx.line_to(x_axis_center-10.0, *negative_tick);
+            self.ctx.fill_text(&i.to_string(), x_axis_center+12.0, *negative_tick+4.0);
+            self.ctx.stroke();
+            
             self.ctx.close_path();
-            // self.ctx.fill_text(&i.to_string(), x_axis_center+10.0, *tick+3.0);
         }
     }
 
