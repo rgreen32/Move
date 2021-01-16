@@ -9,8 +9,6 @@ pub struct Renderer {
     pub canvas_id: String,
     pub grid: Grid,
     pub engine: Engine,
-    // pub canvas_width: u32, //added width and height fields because HTMLCanvas cant be saved to a field atm.
-    // pub canvas_height: u32,
     pub ctx: CanvasRenderingContext2d,
     pub y_axis_length_meters: u32,
 }

@@ -7,6 +7,6 @@ npm install
 ## How to run
 
 ```sh
-npm start --entrypoint=collision
+npm start
 ```
 

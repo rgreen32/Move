@@ -19,9 +19,15 @@ impl Grid{
             canvas_height,
             canvas_pixels_to_meters_ratio: canvas_height as f64/100.0,
             map: HashMap::new(),
+            //for drawing axis
             x_axis_ticks: Vec::new(),
             y_axis_ticks: Vec::new()
         }
+    }
+
+    
+    pub fn generate_spatial_mask(body: &Body){
+        
     }
     
     pub fn initialize_grid(&mut self){
@@ -103,15 +109,10 @@ impl Grid{
             }
         }
             
-        // let mut map: HashMap<Quadrant, Vec<Vec<Cell>>> = HashMap::new(); // add quadrants to map
         self.map.insert(Quadrant::Quadrant1, quadrant1);
         self.map.insert(Quadrant::Quadrant2, quadrant2);
         self.map.insert(Quadrant::Quadrant3, quadrant3);
         self.map.insert(Quadrant::Quadrant4, quadrant4);
-    }
-
-    pub fn generate_spatial_mask(body: &Body){
-        
     }
 
     pub fn meters_to_pixels_distance_x(&self, distance: f64) -> f64{

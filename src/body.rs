@@ -10,10 +10,11 @@ pub struct Body {
     pub mass: f32,
     pub height: f32,
     pub width: f32,
-    pub initial_velocity: f32,
+    pub velocity_magnitude: f32,
+    pub velocity_angle: f32,
     pub is_static: bool,
     pub points: Vec<Point>,
-    pub angle: f32,
+    pub orientation_angle: f32,
     pub sides: u32,
     pub transformed_points: Vec<Point>,
     pub transformed_edges: Vec<Edge>
@@ -37,9 +38,9 @@ impl Body{
         let r = self.width/2.0;
         let mut points: Vec<Point> = vec![];
         for i in 0..self.sides{
-            let xcomponent = cos(((theta*i) as f64 + self.angle as f64) * (PI/180.0)) ;
+            let xcomponent = cos(((theta*i) as f64 + self.orientation_angle as f64) * (PI/180.0)) ;
             let resultx = r as f64 * xcomponent;
-            let ycomponent = sin(((theta*i) as f64 + self.angle as f64) * (PI/180.0)) ;
+            let ycomponent = sin(((theta*i) as f64 + self.orientation_angle as f64) * (PI/180.0)) ;
             let resulty = r as f64 * ycomponent;
             points.push(Point{x: resultx, y: resulty});
         }

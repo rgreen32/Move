@@ -6,12 +6,12 @@ pub struct CollisionDetector{
 }
 
 impl CollisionDetector{
-    pub fn run(&self, bodies: &mut Vec<Body>) {
+    pub fn run(&self, bodies: &Vec<Body>) {
         let collision = CollisionDetector::detect_collision_SAT(bodies);
         if collision{
-            let body1 = &mut bodies[0];
-            let body2 = &mut bodies[1];
-            body2.is_static = true
+            // let body1 = &mut bodies[0];
+            // let body2 = &mut bodies[1];
+            // body2.is_static = true
         }
     }
     
