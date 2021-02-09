@@ -73,8 +73,10 @@ impl SimulationRunner{
     }
 
     pub fn start(mut self){
-        self.renderer.run();
 
+        // for i in 0..4{
+        //     self.renderer.run();
+        // }
         let f = Rc::new(RefCell::new(None));
         let g = f.clone();
         *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {

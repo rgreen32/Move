@@ -9,7 +9,7 @@ impl StopWatch{
         match self.time_delta_root {
             None => {
                 self.time_delta_root = Some(js_sys::Date::now());
-                return 0.0;
+                return 0.000000000000000000000000000001;
             },
             Some(time_delta_root) => {
                 let now = js_sys::Date::now();
