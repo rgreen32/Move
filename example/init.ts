@@ -16,11 +16,13 @@ export class Body{ // put this class here only as a type definition because wasm
     sides: number = 4
     transformed_points: any = [] //Array<Point>
     transformed_edges: any = []//Array<Edge>
-    constructor(position_x: number, position_y: number,height: number, width: number, velocity: number, orientation_angle: number, isStatic: boolean){
+    constructor(position_x: number, position_y: number,height: number, width: number, initial_velocity: number, initial_velocity_angle: number, orientation_angle: number, isStatic: boolean){
         this.position_x = position_x
         this.position_y = position_y
-        this.old_position_x = position_x - velocity
-        this.old_position_y = position_y - velocity
+        initial_velocity = initial_velocity
+        let angle_in_radians = initial_velocity_angle * (Math.PI/180)
+        this.old_position_x = position_x - ((initial_velocity * Math.cos(angle_in_radians)) * 0.16)
+        this.old_position_y = position_y - ((initial_velocity * Math.sin(angle_in_radians)) * 0.16)
         this.height = height
         this.width = width
         // this.velocity_magnitude = velocity

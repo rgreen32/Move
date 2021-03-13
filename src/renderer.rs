@@ -44,14 +44,15 @@ impl Renderer {
         for (i, point_a) in points.iter().enumerate(){
             let point_b = &points[(i + 1) % points.len()];
             self.ctx.begin_path();
-            self.ctx.move_to(self.grid.meters_to_pixels_distance_x(point_a.x), self.grid.meters_to_pixels_distance_y(point_a.y));
-            self.ctx.line_to(self.grid.meters_to_pixels_distance_x(point_b.x), self.grid.meters_to_pixels_distance_y(point_b.y));
+            self.ctx.move_to(self.grid.meters_to_pixels_position_x(point_a.x), self.grid.meters_to_pixels_position_y(point_a.y));
+            self.ctx.line_to(self.grid.meters_to_pixels_position_x(point_b.x), self.grid.meters_to_pixels_position_y(point_b.y));
             self.ctx.stroke();
             self.ctx.close_path();
         }
     }
 
     fn draw_grid(&self){
+        self.ctx.set_font("8px Arial");
         self.ctx.set_stroke_style(&JsValue::from_str("lightgray"));
         for (quadrant, cells)  in self.grid.map.iter(){
             self.draw_quadrant_cells(cells);
@@ -62,6 +63,11 @@ impl Renderer {
         for column in quadrant_cells.iter(){
             for cell in column.iter(){
                 self.draw_cell(cell, self.grid.cell_side_length_meters as i32);
+            // log(&format!("Cell Id: {:?}", cell.id));
+            log(&format!("cell side length: {:?}", self.grid.cell_side_length_meters));
+            // log(&format!("cell side length pixels: {:?}", self.grid.cell_side_length_meters));
+
+            self.ctx.fill_text(&format!("{:?}", cell.id), (cell.strokerect_x + (self.grid.canvas_pixels_to_meters_ratio*(self.grid.cell_side_length_meters/2) as f64)), (cell.strokerect_y + (self.grid.canvas_pixels_to_meters_ratio*(self.grid.cell_side_length_meters/2) as f64)));
             }
         }
     }

@@ -62,7 +62,7 @@ impl SimulationRunner{
         }).collect::<Vec<Body>>();
 
         
-        let engine = Engine {bodies: updated_bodies, collision_detector: CollisionDetector{}, stop_watch: StopWatch{time_delta_root: None}};
+        let engine = Engine {bodies: updated_bodies, collision_detector: CollisionDetector{}, stop_watch: StopWatch{time_delta_root: None}, time_delta_total: 0.0};
 
         let mut grid = Grid::new(10, canvas.width() as f32, canvas.height() as f32);
         grid.initialize_grid();
@@ -74,17 +74,17 @@ impl SimulationRunner{
 
     pub fn start(mut self){
 
-        // for i in 0..4{
-        //     self.renderer.run();
-        // }
-        let f = Rc::new(RefCell::new(None));
-        let g = f.clone();
-        *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
+        for i in 0..1{
             self.renderer.run();
-            request_animation_frame(f.borrow().as_ref().unwrap());
-        }) as Box<dyn FnMut()>));
+        }
+        // let f = Rc::new(RefCell::new(None));
+        // let g = f.clone();
+        // *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
+        //     self.renderer.run();
+        //     request_animation_frame(f.borrow().as_ref().unwrap());
+        // }) as Box<dyn FnMut()>));
 
-        request_animation_frame(g.borrow().as_ref().unwrap());
+        // request_animation_frame(g.borrow().as_ref().unwrap());
 
     }
 }
