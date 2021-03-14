@@ -54,8 +54,14 @@ impl Renderer {
     fn draw_grid(&self){
         self.ctx.set_font("8px Arial");
         self.ctx.set_stroke_style(&JsValue::from_str("lightgray"));
-        for (quadrant, cells)  in self.grid.map.iter(){
-            self.draw_quadrant_cells(cells);
+        for row in self.grid.map.iter(){
+            for cell in row.iter(){
+                // log(&format!("{:?}", cell));
+                self.draw_cell(cell, self.grid.cell_side_length_meters as i32);
+                
+                self.ctx.fill_text(&format!("{:?}", cell.id), (cell.strokerect_x + (self.grid.canvas_pixels_to_meters_ratio*(self.grid.cell_side_length_meters/2) as f64)), (cell.strokerect_y + (self.grid.canvas_pixels_to_meters_ratio*(self.grid.cell_side_length_meters/2) as f64)));
+                self.ctx.stroke();    
+            }
         }
     }
 
@@ -68,7 +74,8 @@ impl Renderer {
             // log(&format!("cell side length pixels: {:?}", self.grid.cell_side_length_meters));
 
             self.ctx.fill_text(&format!("{:?}", cell.id), (cell.strokerect_x + (self.grid.canvas_pixels_to_meters_ratio*(self.grid.cell_side_length_meters/2) as f64)), (cell.strokerect_y + (self.grid.canvas_pixels_to_meters_ratio*(self.grid.cell_side_length_meters/2) as f64)));
-            }
+            self.ctx.stroke();    
+        }
         }
     }
 
