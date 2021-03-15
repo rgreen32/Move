@@ -26,29 +26,58 @@ impl Grid{
     }
 
     
-    pub fn generate_spatial_mask(body: &Body){
-        
+    pub fn generate_spatial_mask(body: &mut Body) -> Vec<String>{
+        let cell_ids: Vec<String> = Vec::new(); 
+        let mut cell_x_range = (0, 0);
+        let mut cell_y_range = (0, 0);
+        // let mut min_x_bound: f64 = 0.0;
+        // let mut  max_x_bound: f64 = 0.0;
+        // let mut min_y_bound: f64 = 0.0;
+        // let mut max_y_bound: f64 = 0.0;
+
+        for edge in &body.transformed_edges{
+            let min_x_bound: f64;
+            let max_x_bound: f64;
+            let min_y_bound: f64;
+            let max_y_bound: f64;
+            if edge.a.x > edge.b.x {
+                min_x_bound = edge.b.x;
+                max_x_bound = edge.a.x;
+            }else{
+                min_x_bound = edge.a.x;
+                max_x_bound = edge.b.x;
+            }
+
+            if edge.a.y > edge.b.y {
+                min_y_bound = edge.b.y;
+                max_y_bound = edge.a.y;
+            }else{
+                min_y_bound = edge.a.y;
+                max_y_bound = edge.b.y;
+            }
+
+        }
+        return cell_ids;
+    }
+
+    pub fn cells_from_bounds_box(&self, min_x_bound: f64, max_x_bound: f64, min_y_bound: f64, max_y_bound: f64) -> Vec<Cell>{
+        let cell = &self.map[0][11];
+        log(&format!("{:?}", cell));
+        return Vec::new();
     }
     
     pub fn initialize_grid(&mut self){
-        log(&format!("ratio: {:?}", self.canvas_pixels_to_meters_ratio));
         let number_of_cells_y_axis = ((self.canvas_height)/(self.canvas_pixels_to_meters_ratio as f32*self.cell_side_length_meters as f32)) as usize;
         let number_of_cells_x_axis = (((self.canvas_width)/(self.canvas_pixels_to_meters_ratio as f32*self.cell_side_length_meters as f32)) + 1.0) as usize; //appending extra cell in case there is space left between last column and edge of screen 
         
         
-        let x_counter = number_of_cells_x_axis/2;
-        let y_counter = number_of_cells_y_axis/2;
-        //iterate rows
-        // let mut map: Vec<Vec<Cell>> = Vec::new();
-        for y in 0..(number_of_cells_y_axis){
+
+        let mut y_counter = 0;
+        let mut y_counter_max = (number_of_cells_y_axis/2);  
+        //TODO: Make quadrants start from 0 
+        for y in (0..(number_of_cells_y_axis/2)).rev(){  
             self.map.push(Vec::new());
-        }
-
-        for y in (0..(number_of_cells_y_axis/2)).rev(){
-            // self.map.push(Vec::new());
-            log(&format!("number_of_cells_x_axis: {:?}", number_of_cells_x_axis));
-            log(&format!("number_of_cells_x_axis/2: {:?}", number_of_cells_x_axis/2));
-
+            // log(&format!("{:?}", y));
             for x in (1..(number_of_cells_x_axis/2) + 1).rev(){
                 let negative_x = -(x as i32);
                 let cell: Cell = Cell{
@@ -59,11 +88,10 @@ impl Grid{
                     strokerect_x: self.meters_to_pixels_position_x(-(x as i32*self.cell_side_length_meters as i32) as f64),
                     strokerect_y:  self.meters_to_pixels_position_y((y as i32*self.cell_side_length_meters as i32 + self.cell_side_length_meters as i32) as f64)
                 };
-
-                self.map[y].push(cell);
+                self.map[y_counter].push(cell);
             }
 
-            for x in 0..number_of_cells_x_axis/2{
+            for x in (0..(number_of_cells_x_axis/2)){
 
                 let cell: Cell = Cell{
                     id: format!("{}{}", x.to_string(), y.to_string()),
@@ -73,11 +101,13 @@ impl Grid{
                     strokerect_x: self.meters_to_pixels_position_x((x as i32*self.cell_side_length_meters as i32) as f64),
                     strokerect_y:  self.meters_to_pixels_position_y((y as i32*self.cell_side_length_meters as i32 + self.cell_side_length_meters as i32) as f64)
                 };
-                self.map[y].push(cell);
+                self.map[y_counter].push(cell);
             }
+            y_counter += 1;
         }
 
         for y in (1..(number_of_cells_y_axis/2) + 1){
+            self.map.push(Vec::new());
             let negative_y = -(y as i32);
             for x in (1..(number_of_cells_x_axis/2) + 1).rev(){
                 let negative_x = -(x as i32);
@@ -90,7 +120,7 @@ impl Grid{
                     strokerect_y:  self.meters_to_pixels_position_y((negative_y*self.cell_side_length_meters as i32 + self.cell_side_length_meters as i32) as f64)
                 };
 
-                self.map[y].push(cell);
+                self.map[y_counter].push(cell);
             }
 
             for x in 0..number_of_cells_x_axis/2{
@@ -104,8 +134,9 @@ impl Grid{
                     strokerect_y:  self.meters_to_pixels_position_y((negative_y as i32*self.cell_side_length_meters as i32 + self.cell_side_length_meters as i32) as f64)
                 };
 
-                self.map[y].push(cell);
+                self.map[y_counter].push(cell);
             }
+            y_counter += 1;
         }
 
     }

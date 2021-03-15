@@ -12,14 +12,13 @@ pub struct Body {
     pub mass: f32,
     pub height: f32,
     pub width: f32,
-    // pub velocity_magnitude: f32,
-    // pub velocity_angle: f32,
+    pub spatial_mask: Vec<String>,
     pub is_static: bool,
     pub points: Vec<Point>,
     pub orientation_angle: f32,
     pub sides: u32,
     pub transformed_points: Vec<Point>,
-    pub transformed_edges: Vec<Edge>
+    pub transformed_edges: Vec<Edge> // for SAT collision detection
 }
 
 impl Body{
@@ -49,7 +48,7 @@ impl Body{
         return points;
     }
 
-    fn calculate_transformed_shape_vectors(&mut self) -> Vec<Point> {
+    fn calculate_transformed_shape_vectors(&mut self) -> Vec<Point> { // translates shape points into points on coordinate plane
         let mut points: Vec<Point> = vec![];
         let origin = Point{x: self.position_x as f64, y: self.position_y as f64};
         for point in self.points.iter(){
@@ -70,9 +69,4 @@ impl Body{
         return edges;
     }
 
-    fn calculate_spatial_mask(self){
-        for point in self.transformed_points.iter(){
-            
-        }
-    }
 }

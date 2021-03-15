@@ -65,19 +65,6 @@ impl Renderer {
         }
     }
 
-    fn draw_quadrant_cells(&self, quadrant_cells: &Vec<Vec<Cell>>){
-        for column in quadrant_cells.iter(){
-            for cell in column.iter(){
-                self.draw_cell(cell, self.grid.cell_side_length_meters as i32);
-            // log(&format!("Cell Id: {:?}", cell.id));
-            log(&format!("cell side length: {:?}", self.grid.cell_side_length_meters));
-            // log(&format!("cell side length pixels: {:?}", self.grid.cell_side_length_meters));
-
-            self.ctx.fill_text(&format!("{:?}", cell.id), (cell.strokerect_x + (self.grid.canvas_pixels_to_meters_ratio*(self.grid.cell_side_length_meters/2) as f64)), (cell.strokerect_y + (self.grid.canvas_pixels_to_meters_ratio*(self.grid.cell_side_length_meters/2) as f64)));
-            self.ctx.stroke();    
-        }
-        }
-    }
 
     fn draw_cell(&self, cell: &Cell, cell_side_length: i32){
         let cell_side_length_pixels = self.grid.canvas_pixels_to_meters_ratio * cell_side_length as f64;
