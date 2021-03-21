@@ -1,5 +1,5 @@
 use crate::{body::Body, log};
-use std::collections::HashMap;
+
 
 pub struct Grid{
     pub cell_side_length_meters: u32,
@@ -26,44 +26,88 @@ impl Grid{
     }
 
     
-    pub fn generate_spatial_mask(body: &mut Body) -> Vec<String>{
+    pub fn generate_spatial_mask(&self, body: &mut Body) -> Vec<String>{
         let cell_ids: Vec<String> = Vec::new(); 
-        let mut cell_x_range = (0, 0);
-        let mut cell_y_range = (0, 0);
-        // let mut min_x_bound: f64 = 0.0;
-        // let mut  max_x_bound: f64 = 0.0;
-        // let mut min_y_bound: f64 = 0.0;
-        // let mut max_y_bound: f64 = 0.0;
+        let mut min_x_bound: f64 = -4.0;
+        let mut  max_x_bound: f64 = 4.0;
+        let mut min_y_bound: f64 = -4.0;
+        let mut max_y_bound: f64 = 4.0;
 
-        for edge in &body.transformed_edges{
-            let min_x_bound: f64;
-            let max_x_bound: f64;
-            let min_y_bound: f64;
-            let max_y_bound: f64;
-            if edge.a.x > edge.b.x {
-                min_x_bound = edge.b.x;
-                max_x_bound = edge.a.x;
-            }else{
-                min_x_bound = edge.a.x;
-                max_x_bound = edge.b.x;
-            }
+        self.cells_from_bounding_box(min_x_bound, max_x_bound, min_y_bound, max_y_bound);
 
-            if edge.a.y > edge.b.y {
-                min_y_bound = edge.b.y;
-                max_y_bound = edge.a.y;
-            }else{
-                min_y_bound = edge.a.y;
-                max_y_bound = edge.b.y;
-            }
+        // for edge in &body.transformed_edges{
+        //     let min_x_bound: f64;
+        //     let max_x_bound: f64;
+        //     let min_y_bound: f64;
+        //     let max_y_bound: f64;
+        //     if edge.a.x > edge.b.x {
+        //         min_x_bound = edge.b.x;
+        //         max_x_bound = edge.a.x;
+        //     }else{
+        //         min_x_bound = edge.a.x;
+        //         max_x_bound = edge.b.x;
+        //     }
 
-        }
+        //     if edge.a.y > edge.b.y {
+        //         min_y_bound = edge.b.y;
+        //         max_y_bound = edge.a.y;
+        //     }else{
+        //         min_y_bound = edge.a.y;
+        //         max_y_bound = edge.b.y;
+        //     }
+
+        // }
         return cell_ids;
     }
 
-    pub fn cells_from_bounds_box(&self, min_x_bound: f64, max_x_bound: f64, min_y_bound: f64, max_y_bound: f64) -> Vec<Cell>{
-        let cell = &self.map[0][11];
-        log(&format!("{:?}", cell));
-        return Vec::new();
+    pub fn cells_from_bounding_box(&self, min_x_bound: f64, max_x_bound: f64, min_y_bound: f64, max_y_bound: f64) -> Vec<&Cell>{
+        // self.position_x_to_index(10.0);
+        // self.position_y_to_index(5.0);
+
+        let mut cells = Vec::new();
+        for i in -100..100 {
+            let i = i as f32 * 0.01;
+            // ...
+        }
+        log(&format!("min y bound: {:?}", min_y_bound.floor()));
+        log(&format!("max y bound: {:?}", max_y_bound.ceil()));
+        log(&format!("min x bound: {:?}", min_x_bound.floor()));
+        log(&format!("max x bound: {:?}", max_x_bound.ceil()));
+        for position_y in min_y_bound.floor() as i32..max_y_bound.ceil() as i32{
+            for position_x in min_x_bound.floor() as i32..max_x_bound.ceil() as i32{
+                let x_index = self.position_x_to_index(position_x);
+                let y_index = self.position_y_to_index(position_y);
+                let cell = &self.map[y_index][x_index];
+                cells.push(cell);
+            }
+        }
+        return cells
+    }
+
+    pub fn position_x_to_index(&self, position_x: i32) -> usize {
+        let map_length = self.map[0].len(); // if row length is ever an odd number, this will cause an error
+        let index_position: i32 = if position_x > 0{
+            ((map_length/2) - 1) as i32 + position_x
+        }else{
+            (map_length/2) as i32 + position_x
+        };
+        // log(&format!("position_x {:?}", position_x));
+        // log(&format!("index position {:?}", index_position));
+        return index_position as usize
+    }
+
+    pub fn position_y_to_index(&self, position_y: i32) -> usize {
+        let map_height = self.map.len();
+        let index_position: i32 = if position_y > 0{
+            // let rounded_position_y = -(position_y.ceil()) as i32;
+            ((map_height/2)) as i32 + position_y
+        }else{
+            // let rounded_position_y = -(position_y.floor()) as i32;
+            ((map_height/2) - 1) as i32 + position_y
+        };
+        // log(&format!("position_y {:?}", position_y));
+        // log(&format!("index position {:?}", index_position));
+        return index_position as usize
     }
     
     pub fn initialize_grid(&mut self){
@@ -73,17 +117,15 @@ impl Grid{
         
 
         let mut y_counter = 0;
-        let mut y_counter_max = (number_of_cells_y_axis/2);  
-        //TODO: Make quadrants start from 0 
         for y in (0..(number_of_cells_y_axis/2)).rev(){  
             self.map.push(Vec::new());
             // log(&format!("{:?}", y));
             for x in (1..(number_of_cells_x_axis/2) + 1).rev(){
                 let negative_x = -(x as i32);
                 let cell: Cell = Cell{
-                    id: format!("{}{}", negative_x.to_string(), y.to_string()),
+                    id: format!("{}{}", negative_x.to_string(), (y+1).to_string()),
                     quadrant: Quadrant::Quadrant2,
-                    position_x: -(x as i32*self.cell_side_length_meters as i32),
+                    position_x: (negative_x*self.cell_side_length_meters as i32),
                     position_y: y as i32*self.cell_side_length_meters as i32,
                     strokerect_x: self.meters_to_pixels_position_x(-(x as i32*self.cell_side_length_meters as i32) as f64),
                     strokerect_y:  self.meters_to_pixels_position_y((y as i32*self.cell_side_length_meters as i32 + self.cell_side_length_meters as i32) as f64)
@@ -94,7 +136,7 @@ impl Grid{
             for x in (0..(number_of_cells_x_axis/2)){
 
                 let cell: Cell = Cell{
-                    id: format!("{}{}", x.to_string(), y.to_string()),
+                    id: format!("{}{}", (x+1).to_string(), (y+1).to_string()),
                     quadrant: Quadrant::Quadrant2,
                     position_x: (x as i32)*self.cell_side_length_meters as i32,
                     position_y: y as i32*self.cell_side_length_meters as i32,
@@ -126,7 +168,7 @@ impl Grid{
             for x in 0..number_of_cells_x_axis/2{
 
                 let cell: Cell = Cell{
-                    id: format!("{}{}", x.to_string(), negative_y.to_string()),
+                    id: format!("{}{}", (x+1).to_string(), negative_y.to_string()),
                     quadrant: Quadrant::Quadrant2,
                     position_x: (x as i32)*self.cell_side_length_meters as i32,
                     position_y: negative_y*self.cell_side_length_meters as i32,

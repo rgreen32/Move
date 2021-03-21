@@ -1,5 +1,5 @@
 use wasm_bindgen::prelude::*;
-use std::{cell::RefCell, rc::Rc};
+use crate::log;
 use crate::{renderer::Renderer};
 use crate::engine::Engine;
 use crate::stop_watch::StopWatch;
@@ -66,8 +66,8 @@ impl SimulationRunner{
 
         let mut grid = Grid::new(10, canvas.width() as f32, canvas.height() as f32);
         grid.initialize_grid();
-        grid.cells_from_bounds_box(0.0, 0.0, 0.0, 0.0);
-        
+        let cells = grid.cells_from_bounding_box(1.0, 2.0, 1.0, 2.0);
+        log(&format!("Cells: {:?}", cells));
         let renderer = Renderer::new(window, String::from(canvas_id), grid, engine, ctx);
 
         return SimulationRunner{renderer: renderer}
