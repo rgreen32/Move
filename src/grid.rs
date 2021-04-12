@@ -65,19 +65,51 @@ impl Grid{
         // self.position_y_to_index(5.0);
 
         let mut cells = Vec::new();
-        for i in -100..100 {
-            let i = i as f32 * 0.01;
-            // ...
-        }
+        // for i in -100..100 {
+        //     let i = i as f32 * 0.01;
+        //     // ...
+        // }
         log(&format!("min y bound: {:?}", min_y_bound.floor()));
         log(&format!("max y bound: {:?}", max_y_bound.ceil()));
         log(&format!("min x bound: {:?}", min_x_bound.floor()));
         log(&format!("max x bound: {:?}", max_x_bound.ceil()));
-        for position_y in min_y_bound.floor() as i32..max_y_bound.ceil() as i32{
-            for position_x in min_x_bound.floor() as i32..max_x_bound.ceil() as i32{
+        log(&format!("============================"));
+        let mut min_y_position = if min_y_bound > 0.0 {
+            let min_y_floored = (min_y_bound.floor() as i32);
+            (min_y_floored - (min_y_floored % 10))/10
+        }else{
+            let min_y_floored = (min_y_bound.floor() as i32);
+            ((min_y_floored - (min_y_floored % 10))/10) -1
+            };
+        let mut max_y_position = max_y_bound.ceil() as i32;
+
+
+        let mut min_x_position = if min_x_bound > 0.0 {
+            let min_x_floored = (min_x_bound.floor() as i32);
+            (min_x_floored - (min_x_floored % 10))/10
+        }else{
+            let min_x_floored = (min_x_bound.floor() as i32);
+            ((min_x_floored - (min_x_floored % 10))/10) -1
+            };
+        let mut max_x_position = max_x_bound.ceil() as i32;
+        // min_y_position = (min_y_position - (min_y_position % 10))/10;
+        max_y_position = (max_y_position - (max_y_position % 10))/10;
+        // min_x_position = (min_x_position - (min_x_position % 10))/10;
+        max_x_position = (max_x_position - (max_x_position % 10))/10;
+        log(&format!("min_y_position: {:?}", min_y_position));
+        log(&format!("max_y_position: {:?}", max_y_position));
+        log(&format!("min_x_position: {:?}", min_x_position));
+        log(&format!("max_x_position: {:?}", max_x_position));
+        for position_y in min_y_position..max_y_position + 1{
+            for position_x in min_x_position..max_x_position + 1{
+                // log(&format!("position x: {:?}", position_x));
+                // log(&format!("position y: {:?}", position_y));
                 let x_index = self.position_x_to_index(position_x);
                 let y_index = self.position_y_to_index(position_y);
+                // log(&format!("index x: {:?}", x_index));
+                // log(&format!("index y: {:?}", y_index));
                 let cell = &self.map[y_index][x_index];
+                // log(&format!("cell: {:?}", cell));
                 cells.push(cell);
             }
         }
@@ -85,9 +117,14 @@ impl Grid{
     }
 
     pub fn position_x_to_index(&self, position_x: i32) -> usize {
+        // let r = position_x % 10;
+        // let mut position = position_x - r;
+        // position = position/10;
         let map_length = self.map[0].len(); // if row length is ever an odd number, this will cause an error
+        // log(&format!("position_x: {:?}", position_x));
+        // log(&format!("map_length: {:?}", map_length/2));
         let index_position: i32 = if position_x > 0{
-            ((map_length/2) - 1) as i32 + position_x
+            ((map_length/2)) as i32 + position_x
         }else{
             (map_length/2) as i32 + position_x
         };
@@ -97,13 +134,18 @@ impl Grid{
     }
 
     pub fn position_y_to_index(&self, position_y: i32) -> usize {
+        // let r = position_y % 10;
+        // let mut position = position_y - r;
+        // position = position/10;
         let map_height = self.map.len();
+        log(&format!("map_height: {:?}", map_height/2));
+        // log(&format!("position_y: {:?}", position_y));
         let index_position: i32 = if position_y > 0{
             // let rounded_position_y = -(position_y.ceil()) as i32;
-            ((map_height/2)) as i32 + position_y
+            ((map_height/2) -1) as i32 - position_y
         }else{
             // let rounded_position_y = -(position_y.floor()) as i32;
-            ((map_height/2) - 1) as i32 + position_y
+            ((map_height/2) - 1) as i32 + position_y.abs()
         };
         // log(&format!("position_y {:?}", position_y));
         // log(&format!("index position {:?}", index_position));

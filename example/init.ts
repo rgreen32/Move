@@ -16,6 +16,7 @@ export class Body{ // put this class here only as a type definition because wasm
     spatial_mask: any = []
     transformed_points: any = [] //Array<Point>
     transformed_edges: any = []//Array<Edge>
+    bounding_points: any
     constructor(position_x: number, position_y: number,height: number, width: number, initial_velocity: number, initial_velocity_angle: number, orientation_angle: number, isStatic: boolean){
         this.position_x = position_x
         this.position_y = position_y
@@ -29,5 +30,6 @@ export class Body{ // put this class here only as a type definition because wasm
         // this.velocity_angle = velocity_angle
         this.orientation_angle = orientation_angle
         this.is_static = isStatic
+        this.bounding_points = [{x :0, y:0}, {x:0, y:0}];
     }
 }

@@ -18,7 +18,8 @@ pub struct Body {
     pub orientation_angle: f32,
     pub sides: u32,
     pub transformed_points: Vec<Point>,
-    pub transformed_edges: Vec<Edge> // for SAT collision detection
+    pub transformed_edges: Vec<Edge>,// for SAT collision detection
+    pub bounding_points: (Point, Point)
 }
 
 impl Body{
@@ -26,12 +27,13 @@ impl Body{
     pub fn init(&mut self){ //Have to generate these values 
         self.points = self.calculate_shape_vectors();
         self.transformed_points = self.calculate_transformed_shape_vectors();
-        self.transformed_edges = self.calculate_transformed_edges();
+        // self.transformed_edges = self.calculate_transformed_edges();
+        self.bounding_points = self.calculate_bounding_points();
     }
 
     pub fn update(&mut self){
         self.transformed_points = self.calculate_transformed_shape_vectors();
-        self.transformed_edges = self.calculate_transformed_edges();
+        // self.transformed_edges = self.calculate_transformed_edges();
     }
 
     fn calculate_shape_vectors(&mut self) -> Vec<Point> {
@@ -47,6 +49,30 @@ impl Body{
         }
         return points;
     }
+
+    fn calculate_bounding_points(&mut self) -> (Point, Point) {
+        let mut min_x = std::f64::INFINITY;
+        let mut max_x = std::f64::NEG_INFINITY;
+        let mut min_y = std::f64::INFINITY;
+        let mut max_y = std::f64::NEG_INFINITY;
+        for point in &self.points{
+            if point.x < min_x{
+                min_x = point.x;
+            }else if point.x > max_x{
+                max_x = point.x
+            }
+            if point.y < min_y{
+                min_y = point.y
+            }else if point.y > max_y{
+                max_y = point.y
+            }
+        }
+        return (Point{x: min_x, y: max_y}, Point{x: max_x, y: min_y});
+    }
+
+    // fn update_bounding_points(&mut self) -> (Point, Point) {
+        
+    // }
 
     fn calculate_transformed_shape_vectors(&mut self) -> Vec<Point> { // translates shape points into points on coordinate plane
         let mut points: Vec<Point> = vec![];

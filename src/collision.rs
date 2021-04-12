@@ -1,18 +1,23 @@
 use crate::Body;
 use crate::{Edge, Point, Bounds};
 use std::{f64::INFINITY};
+use crate::log;
 pub struct CollisionDetector{
 
 }
 
 impl CollisionDetector{
     pub fn run(&self, bodies: &Vec<Body>) {
-        let collision = CollisionDetector::detect_collision_SAT(bodies);
-        if collision{
+        for body in bodies{
+            // log(&format!("body.points: {:?}", body.points));
+            // log(&format!("body.transformed_points: {:?}", body.transformed_points));
+        }
+        // let collision = CollisionDetector::detect_collision_SAT(bodies);
+        // if collision{
             // let body1 = &mut bodies[0];
             // let body2 = &mut bodies[1];
             // body2.is_static = true
-        }
+        // }
     }
     
     fn create_axis_from_edge(edge: &Edge) -> Point {
