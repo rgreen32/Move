@@ -1,3 +1,5 @@
+# This project was created for me to see how web-assembly performs under a compute heavy and application ( also for me to sharpen my Rust 😉 )
+
 ## How to install
 
 ```sh
