@@ -1,12 +1,12 @@
-# This project was created for me to see how web-assembly performs under a compute heavy and application ( also for me to sharpen my Rust 😉 )
+## This project was created for me to see how web-assembly performs under a compute-heavy application ( also for me to sharpen my Rust 😉 )
 
-## How to install
+### How to install
 
 ```sh
 npm install
 ```
 
-## How to run
+### How to run
 
 ```sh
 npm start
