@@ -1,4 +1,4 @@
-## This project was created for me to see how web-assembly performs under a compute-heavy application ( also for me to sharpen my Rust 😉 )
+### This project was created to test how web-assembly would perform being used in a compute-heavy application
 
 ### How to install
 
